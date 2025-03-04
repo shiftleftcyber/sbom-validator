@@ -1,4 +1,4 @@
-module shiftsbom-validator
+module github.com/shiftleftcyber/sbom-validator
 
 go 1.21.0
 

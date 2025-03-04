@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"shiftsbom-validator/sbomvalidator"
+	"github.com/shiftleftcyber/sbom-validator/sbomvalidator"
 )
 
 const DEFAULT_SCHEMA_DIR = "schemas"
