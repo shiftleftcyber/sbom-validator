@@ -1,8 +1,6 @@
 package sbomvalidator
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -65,79 +63,48 @@ func TestDetectSBOMType(t *testing.T) {
 	}
 }
 
-// TestLoadSchema verifies that LoadSchema correctly loads schema files
-// and handles errors properly.
 func TestLoadSchema(t *testing.T) {
-	// Create a temporary directory for schema files
-	tempDir := t.TempDir()
-	cdxSchemaDir := filepath.Join(tempDir, "cyclonedx")
-	if err := os.MkdirAll(cdxSchemaDir, os.ModePerm); err != nil {
-		t.Fatalf("Failed to create schema directory: %v", err)
-	}
-
-	// Define a valid test schema file
-	validSchemaContent := `{"title": "CycloneDX Schema", "type": "object"}`
-	version := "1.4"
-	validSchemaPath := filepath.Join(cdxSchemaDir, "bom-1.4.schema.json")
-
-	// Create a valid schema file
-	if err := os.WriteFile(validSchemaPath, []byte(validSchemaContent), 0644); err != nil {
-		t.Fatalf("Failed to write schema file: %v", err)
-	}
-
 	tests := []struct {
-		name      string
-		version   string
-		schemaDir string
-		sbomType  string
-		wantErr   bool
-		wantData  string
+		name     string
+		version  string
+		sbomType string
+		wantErr  bool
 	}{
 		{
-			name:      "Valid CycloneDX Schema",
-			version:   version,
-			schemaDir: tempDir,
-			sbomType:  SBOM_CYCLONEDX,
-			wantErr:   false,
-			wantData:  validSchemaContent,
+			name:     "Valid CycloneDX Schema",
+			version:  "1.4",
+			sbomType: SBOM_CYCLONEDX,
+			wantErr:  false,
 		},
 		{
-			name:      "Schema File Not Found",
-			version:   "2.0",
-			schemaDir: tempDir,
-			sbomType:  SBOM_CYCLONEDX,
-			wantErr:   true,
+			name:     "Schema File Not Found",
+			version:  "2.0", // This version does not exist in embedded schemas
+			sbomType: SBOM_CYCLONEDX,
+			wantErr:  true,
 		},
 		{
-			name:      "Unsupported SBOM Type",
-			version:   version,
-			schemaDir: tempDir,
-			sbomType:  "UnknownSBOM",
-			wantErr:   true,
-		},
-		{
-			name:      "Invalid Schema Directory",
-			version:   version,
-			schemaDir: "/invalid/path",
-			sbomType:  SBOM_CYCLONEDX,
-			wantErr:   true,
+			name:     "Unsupported SBOM Type",
+			version:  "1.4",
+			sbomType: "UnknownSBOM",
+			wantErr:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := LoadSchema(tt.version, tt.schemaDir, tt.sbomType)
+			data, err := LoadSchema(tt.version, tt.sbomType)
 
-			if tt.wantErr && err == nil {
-				t.Errorf("Expected an error but got none")
-			}
-
-			if !tt.wantErr && err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-
-			if !tt.wantErr && data != tt.wantData {
-				t.Errorf("Schema content mismatch. Got: %v, Want: %v", data, tt.wantData)
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Expected an error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if len(data) == 0 {
+					t.Errorf("Expected schema content but got empty string")
+				}
 			}
 		})
 	}
@@ -208,14 +175,14 @@ func TestExtractVersion(t *testing.T) {
 // TestValidateSBOM verifies ValidateSBOM function for both valid and invalid SBOM data.
 func TestValidateSBOM(t *testing.T) {
 	validSchema := `{
-		"$schema": "http://json-schema.org/draft-07/schema#",
-		"type": "object",
-		"properties": {
-			"bomFormat": { "type": "string" },
-			"specVersion": { "type": "string" }
-		},
-		"required": ["bomFormat", "specVersion"]
-	}`
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "bomFormat": { "type": "string" },
+            "specVersion": { "type": "string" }
+        },
+        "required": ["bomFormat", "specVersion"]
+    }`
 
 	tests := []struct {
 		name       string

@@ -47,7 +47,7 @@ clean:
 
 .PHONY: build
 build:
-	$(GO) build -o bin/ShiftSBOM-Validate
+	$(GO) build -o bin/sbom-validator
 
 .PHONY: markdown-lint
 markdown-lint:

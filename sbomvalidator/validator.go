@@ -1,12 +1,11 @@
 package sbomvalidator
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -15,6 +14,11 @@ const (
 	SBOM_CYCLONEDX = "CycloneDX"
 	SBOM_SPDX      = "spdx"
 )
+
+// Embed all JSON schema files from the schemas/cyclonedx directory
+//
+//go:embed schemas/cyclonedx/*.json
+var schemaFS embed.FS
 
 // ValidateSBOM validates an SBOM JSON object against a provided SBOM schema.
 //
@@ -154,19 +158,16 @@ func isValidJSON(jsonStr string) bool {
 //	    log.Fatalf("Failed to load schema: %v", err)
 //	}
 //	fmt.Println("Schema content loaded successfully.")
-func LoadSchema(version string, schemaDir string, sbomType string) (string, error) {
+func LoadSchema(version string, sbomType string) (string, error) {
 	if sbomType != SBOM_CYCLONEDX {
 		return "", fmt.Errorf("unsupported SBOM type: %s", sbomType)
 	}
 
-	schemaFile := filepath.Join(schemaDir, "cyclonedx", fmt.Sprintf("bom-%s.schema.json", version))
+	schemaFile := fmt.Sprintf("schemas/cyclonedx/bom-%s.schema.json", version)
 
-	data, err := os.ReadFile(schemaFile)
+	data, err := schemaFS.ReadFile(schemaFile)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("schema file not found for version: %s", version)
-		}
-		return "", fmt.Errorf("failed to read schema file: %v", err)
+		return "", fmt.Errorf("failed to read embedded schema file: %w", err)
 	}
 
 	return string(data), nil
