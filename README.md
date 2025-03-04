@@ -1,29 +1,34 @@
 # ShiftSBOM Validator
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/shiftsbom-validator.svg)](https://pkg.go.dev/github.com/yourusername/shiftsbom-validator)
+[![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/sbom-validator.svg)](https://pkg.go.dev/github.com/shiftleftcyber/sbom-validator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Overview
 
-**ShiftSBOM Validator** is a Go library designed to validate **Software Bill of Materials (SBOMs)** against the official SBOM specifications. It ensures compliance with formats like **CycloneDX** and helps maintain software supply chain security.
+**sbom-validator** is a Go library designed to validate
+**Software Bill of Materials (SBOMs)** against the official
+SBOM specifications. It ensures compliance with formats like
+**CycloneDX** & **SPDX** and helps maintain software supply chain security.
 
 ## Features
 
-✅ Detects SBOM type (e.g., CycloneDX)  
-✅ Extracts SBOM version  
-✅ Validates SBOM JSON against official schemas  
-✅ Provides detailed validation errors  
+✅ Detects SBOM type (e.g., CycloneDX, SPDX)
+✅ Extracts SBOM version
+✅ Validates SBOM JSON against official schemas
+✅ Provides detailed validation errors
 
 ## Installation
 
 Use `go get` to install the package:
 
 ```sh
-go get github.com/shiftleftcyber/shiftsbom-validator
+go get github.com/shiftleftcyber/sbom-validator
 ```
 
 ## Usage
+
 ```go
+
 package main
 
 import (
@@ -31,12 +36,12 @@ import (
     "log"
     "os"
 
-    "github.com/shiftleftcyber/shiftsbom-validator"
+    "github.com/shiftleftcyber/sbom-validator"
 )
 
 func main() {
     sbomPath := "path/to/sbom.json"
-    
+
     jsonData, err := os.ReadFile(sbomPath)
     if err != nil {
         log.Fatalf("Failed to read SBOM file: %v", err)
@@ -63,9 +68,9 @@ func main() {
     }
 
     if valid {
-        fmt.Println("✅ SBOM is valid!")
+        fmt.Println("SBOM is valid!")
     } else {
-        fmt.Println("❌ SBOM validation failed:")
+        fmt.Println("SBOM validation failed:")
         for _, errMsg := range errors {
             fmt.Println("- " + errMsg)
         }
@@ -75,7 +80,12 @@ func main() {
 
 ## Running Tests
 
-A convient Makefile is included. To run tests you can run
+```sh
+cd sbomvalidator
+go test ./...
+```
+
+or you can use the included Makefile
 
 ```sh
 make test
