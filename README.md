@@ -13,8 +13,11 @@ SBOM specifications. It ensures compliance with formats like
 ## Features
 
 ✅ Detects SBOM type (e.g., CycloneDX, SPDX)
+
 ✅ Extracts SBOM version
+
 ✅ Validates SBOM JSON against official schemas
+
 ✅ Provides detailed validation errors
 
 ## Installation
