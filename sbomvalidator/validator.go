@@ -38,7 +38,7 @@ var schemaFS embed.FS
 //
 //	valid, errors, err := ValidateSBOM(schemaJSON, sbomJSON)
 //	if err != nil {
-//	    log.Fatalf("Validation error: %v", err)
+//	    log.Println("Validation error: %v", err)
 //	}
 //	if valid {
 //	    fmt.Println("SBOM is valid!")
@@ -94,7 +94,7 @@ func ValidateSBOM(schemaSBOM, sbomData string) (bool, []string, error) {
 //
 //	version, err := ExtractVersion(`{"specVersion": "1.4"}`, "CycloneDX")
 //	if err != nil {
-//	    log.Fatalf("Error extracting version: %v", err)
+//	    log.Println("Error extracting version: %v", err)
 //	}
 //	fmt.Println(version) // Output: "1.4"
 func ExtractVersion(jsonData string, sbomType string) (string, error) {

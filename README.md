@@ -25,7 +25,7 @@ SBOM specifications. It ensures compliance with formats like
 Use `go get` to install the package:
 
 ```sh
-go get github.com/shiftleftcyber/sbom-validator
+go get github.com/shiftleftcyber/sbom-validator/sbomvalidator
 ```
 
 ## Usage
@@ -39,7 +39,7 @@ import (
     "log"
     "os"
 
-    "github.com/shiftleftcyber/sbom-validator"
+    "github.com/shiftleftcyber/sbom-validator/sbomvalidator"
 )
 
 func main() {

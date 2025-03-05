@@ -9,8 +9,6 @@ import (
     "github.com/shiftleftcyber/sbom-validator/sbomvalidator"
 )
 
-const DEFAULT_SCHEMA_DIR = "schemas"
-
 // main serves as a reference implementation for SBOM validation.
 //
 // This function demonstrates how to use the sbomvalidator package to:
