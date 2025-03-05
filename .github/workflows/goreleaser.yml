@@ -28,7 +28,7 @@ jobs:
       uses: CycloneDX/gh-gomod-generate-sbom@v2
       with:
         version: v1
-        args: mod -licenses -json -output -output-version 1.6 sbom-validator.${{ github.ref_name }}.cdx.json
+        args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
     - name: Archive SBOM
       uses: actions/upload-artifact@v4
       with:
