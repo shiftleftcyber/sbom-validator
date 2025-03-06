@@ -6,7 +6,7 @@ import (
     "log"
     "os"
 
-    "github.com/shiftleftcyber/sbom-validator/sbomvalidator"
+    "github.com/shiftleftcyber/sbom-validator"
 )
 
 // main serves as a reference implementation for SBOM validation.
