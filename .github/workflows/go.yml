@@ -25,7 +25,7 @@ jobs:
     - name: Build
       run: |
         go version  
-        go build -o bin/sbom-validator
+        go build -o bin/sbom-validator-example example/main.go
         ls -la
         ls -la bin
 

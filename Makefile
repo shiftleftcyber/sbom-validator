@@ -47,7 +47,7 @@ clean:
 
 .PHONY: build
 build:
-	$(GO) build -o bin/sbom-validator
+	$(GO) build -o bin/sbom-validator-example example/main.go
 
 .PHONY: markdown-lint
 markdown-lint:

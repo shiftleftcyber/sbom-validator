@@ -29,11 +29,6 @@ jobs:
       with:
         version: v1
         args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
-    - name: Archive SBOM
-      uses: actions/upload-artifact@v4
-      with:
-        name: SBOM
-        path: sbom-validator.${{ github.ref_name }}.cdx.json
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf # tag=v6.1.0
       with:
@@ -41,3 +36,8 @@ jobs:
         args: release --clean
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Archive SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: SBOM
+        path: sbom-validator.${{ github.ref_name }}.cdx.json
