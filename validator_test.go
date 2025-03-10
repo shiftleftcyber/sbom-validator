@@ -13,15 +13,15 @@ func TestDetectSBOMType(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			name:     "Valid CycloneDX SBOM",
-			jsonData: `{"bomFormat": "CycloneDX", "specVersion": "1.4"}`,
-			want:     "CycloneDX",
+			name:      "Valid CycloneDX SBOM",
+			jsonData:  `{"bomFormat": "CycloneDX", "specVersion": "1.4"}`,
+			want:      "CycloneDX",
 			expectErr: false,
 		},
 		{
-			name:     "Valid SPDX SBOM",
-			jsonData: `{"specVersion": "SPDX", "spdxVersion": "SPDX-2.3"}`,
-			want:     "SPDX",
+			name:      "Valid SPDX SBOM",
+			jsonData:  `{"specVersion": "SPDX", "spdxVersion": "SPDX-2.3"}`,
+			want:      "SPDX",
 			expectErr: true,
 		},
 		{
@@ -53,7 +53,7 @@ func TestDetectSBOMType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := DetectSBOMType(tt.jsonData)
+			got, err := detectSBOMType(tt.jsonData)
 			if (err != nil) != tt.expectErr {
 				t.Errorf("DetectSBOMType() error = %v, expectErr %v", err, tt.expectErr)
 				return
@@ -94,7 +94,7 @@ func TestLoadSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := LoadSchema(tt.version, tt.sbomType)
+			data, err := loadSBOMSchema(tt.version, tt.sbomType)
 
 			if tt.wantErr {
 				if err == nil {
@@ -119,46 +119,46 @@ func TestExtractVersion(t *testing.T) {
 		name      string
 		jsonData  string
 		sbomType  string
-		expectErr   bool
+		expectErr bool
 		wantValue string
 	}{
 		{
 			name:      "Valid CycloneDX SBOM",
 			jsonData:  `{"specVersion": "1.4"}`,
 			sbomType:  "CycloneDX",
-			expectErr:   false,
+			expectErr: false,
 			wantValue: "1.4",
 		},
 		{
-			name:		"Valid SPDX SBOM",
-			jsonData: 	`{"spdxVersion": "SPDX-2.3"}`,
-			sbomType:	"SPDX",
-			expectErr: 	false,
-			wantValue: 	"SPDX-2.3",
+			name:      "Valid SPDX SBOM",
+			jsonData:  `{"spdxVersion": "SPDX-2.3"}`,
+			sbomType:  "SPDX",
+			expectErr: false,
+			wantValue: "SPDX-2.3",
 		},
 		{
-			name:     "Missing specVersion field",
-			jsonData: `{"bomFormat": "CycloneDX"}`,
-			sbomType: "CycloneDX",
-			expectErr:  true,
+			name:      "Missing specVersion field",
+			jsonData:  `{"bomFormat": "CycloneDX"}`,
+			sbomType:  "CycloneDX",
+			expectErr: true,
 		},
 		{
-			name:     "Invalid specVersion type",
-			jsonData: `{"specVersion": 1.4}`,
-			sbomType: "CycloneDX",
-			expectErr:  true,
+			name:      "Invalid specVersion type",
+			jsonData:  `{"specVersion": 1.4}`,
+			sbomType:  "CycloneDX",
+			expectErr: true,
 		},
 		{
-			name:     "Invalid JSON structure",
-			jsonData: `{"specVersion": "1.4"`,
-			sbomType: "CycloneDX",
-			expectErr:  true,
+			name:      "Invalid JSON structure",
+			jsonData:  `{"specVersion": "1.4"`,
+			sbomType:  "CycloneDX",
+			expectErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			version, err := ExtractVersion(tt.jsonData, tt.sbomType)
+			version, err := extractSBOMVersion(tt.jsonData, tt.sbomType)
 
 			if tt.expectErr && err == nil {
 				t.Errorf("Expected error but got none")
@@ -232,7 +232,7 @@ func TestValidateSBOM(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			valid, errors, err := ValidateSBOM(tt.schema, tt.sbomData)
+			valid, errors, err := validateSBOM(tt.schema, tt.sbomData)
 
 			if tt.wantValid && !valid {
 				t.Errorf("Expected SBOM to be valid but got invalid")
