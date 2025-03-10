@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cyclonedx.org/schema/bom/1.6 http://cyclonedx.org/schema/bom-1.6.xsd">
+    <bomFormat>CycloneDX</bomFormat>
+    <specVersion>1.6</specVersion>
+    <serialNumber>urn:uuid:123e4567-e89b-12d3-a456-426614174000</serialNumber>
+    <version>1</version>
+    <metadata>
+        <timestamp>2024-10-22T12:00:00Z</timestamp>
+        <tools>
+            <tool>
+                <vendor>ACME Corp</vendor>
+                <name>SBOM Generator</name>
+                <version>1.0.0</version>
+            </tool>
+        </tools>
+        <component>
+            <type>application</type>
+            <name>Example Application</name>
+            <version>1.0.0</version>
+        </component>
+    </metadata>
+    <components>
+        <component>
+            <type>library</type>
+            <name>example-library</name>
+            <version>2.0.0</version>
+            <purl>pkg:maven/org.example/example-library@2.0.0</purl>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+        </component>
+    </components>
+    <dependencies>
+        <dependency>
+            <ref>pkg:maven/org.example/example-library@2.0.0</ref>
+            <dependsOn/>
+        </dependency>
+    </dependencies>
+</bom>
