@@ -16,11 +16,13 @@ func TestDetectSBOMType(t *testing.T) {
 			name:     "Valid CycloneDX SBOM",
 			jsonData: `{"bomFormat": "CycloneDX", "specVersion": "1.4"}`,
 			want:     "CycloneDX",
+			expectErr: false,
 		},
 		{
 			name:     "Valid SPDX SBOM",
-			jsonData: `{"bomFormat": "SPDX", "spdxVersion": "2.2"}`,
+			jsonData: `{"specVersion": "SPDX", "spdxVersion": "SPDX-2.3"}`,
 			want:     "SPDX",
+			expectErr: true,
 		},
 		{
 			name:      "Missing bomFormat field",
@@ -117,39 +119,40 @@ func TestExtractVersion(t *testing.T) {
 		name      string
 		jsonData  string
 		sbomType  string
-		wantErr   bool
+		expectErr   bool
 		wantValue string
 	}{
 		{
 			name:      "Valid CycloneDX SBOM",
 			jsonData:  `{"specVersion": "1.4"}`,
 			sbomType:  "CycloneDX",
-			wantErr:   false,
+			expectErr:   false,
 			wantValue: "1.4",
+		},
+		{
+			name:		"Valid SPDX SBOM",
+			jsonData: 	`{"spdxVersion": "SPDX-2.3"}`,
+			sbomType:	"SPDX",
+			expectErr: 	false,
+			wantValue: 	"SPDX-2.3",
 		},
 		{
 			name:     "Missing specVersion field",
 			jsonData: `{"bomFormat": "CycloneDX"}`,
 			sbomType: "CycloneDX",
-			wantErr:  true,
+			expectErr:  true,
 		},
 		{
 			name:     "Invalid specVersion type",
 			jsonData: `{"specVersion": 1.4}`,
 			sbomType: "CycloneDX",
-			wantErr:  true,
+			expectErr:  true,
 		},
 		{
 			name:     "Invalid JSON structure",
 			jsonData: `{"specVersion": "1.4"`,
 			sbomType: "CycloneDX",
-			wantErr:  true,
-		},
-		{
-			name:     "Unsupported SBOM type",
-			jsonData: `{"specVersion": "1.4"}`,
-			sbomType: "SPDX",
-			wantErr:  true,
+			expectErr:  true,
 		},
 	}
 
@@ -157,15 +160,15 @@ func TestExtractVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			version, err := ExtractVersion(tt.jsonData, tt.sbomType)
 
-			if tt.wantErr && err == nil {
+			if tt.expectErr && err == nil {
 				t.Errorf("Expected error but got none")
 			}
 
-			if !tt.wantErr && err != nil {
+			if !tt.expectErr && err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
 
-			if !tt.wantErr && version != tt.wantValue {
+			if !tt.expectErr && version != tt.wantValue {
 				t.Errorf("Expected version %q but got %q", tt.wantValue, version)
 			}
 		})

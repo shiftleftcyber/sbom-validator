@@ -3,7 +3,6 @@ package sbomvalidator
 import (
 	"embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 
@@ -12,13 +11,121 @@ import (
 
 const (
 	SBOM_CYCLONEDX = "CycloneDX"
-	SBOM_SPDX      = "spdx"
+	SBOM_SPDX      = "SPDX"
 )
 
 // Embed all JSON schema files from the schemas/cyclonedx directory
 //
 //go:embed schemas/cyclonedx/*.json
 var schemaFS embed.FS
+
+// DetectSBOMType identifies the SBOM format based on the JSON structure.
+//
+// This function parses the provided SBOM JSON data and detects its type by checking the "bomFormat" field.
+// It returns the detected SBOM type as a string (e.g., "CycloneDX").
+//
+// Parameters:
+//   - jsonData: A string containing the SBOM JSON data.
+//
+// Returns:
+//   - A string representing the detected SBOM format.
+//   - An error if the JSON is invalid or the "bomFormat" field is missing.
+//
+// Example:
+//
+//	sbomType, err := DetectSBOMType(`{"bomFormat": "CycloneDX", "specVersion": "1.4"}`)
+//	if err != nil {
+//	    log.Fatalf("Failed to detect SBOM type: %v", err)
+//	}
+//	fmt.Println("Detected SBOM type:", sbomType) // Output: "CycloneDX"
+func DetectSBOMType(jsonData string) (string, error) {
+
+	obj, err := ParseJSON(jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	// CycloneDX contains a bomFormat field
+	bomFormat, ok := obj["bomFormat"].(string)
+	if ok {
+		log.Println("CycloneDX SBOM type detected")
+		return bomFormat, nil
+	}
+
+	spdxVersion, ok := obj["spdxVersion"].(string)
+	if ok {
+		return "", fmt.Errorf("SPDX is not currently supported - %v", spdxVersion)
+	}
+
+	return "", fmt.Errorf("unknown SBOM type or missing required fields")
+}
+
+// ValidateSBOMData is the main function to validate SBOM data using this library.
+// 
+// This function serves as a wrapper around multiple internal functions, making it the 
+// recommended entry point for validating SBOMs. It performs the following steps:
+// 1. Detects whether the SBOM is in JSON format.
+// 2. Determines the SBOM type (CycloneDX, SPDX, etc.).
+// 3. Extracts the schema version from the SBOM data.
+// 4. Loads the corresponding schema for validation.
+// 5. Validates the SBOM against the schema and returns the validation result.
+//
+// Parameters:
+//   - sbomContent: A byte slice containing the SBOM data.
+//
+// Returns:
+//   - bool: `true` if the SBOM is valid, `false` otherwise.
+//   - []string: A list of validation error messages if the SBOM is invalid (nil if valid).
+//   - error: An error if the function encounters issues during validation.
+//
+// Errors:
+//   - Returns an error if the SBOM format is not JSON.
+//   - Returns an error if SBOM type detection fails.
+//   - Returns an error if the SBOM type is not CycloneDX (currently the only supported format).
+//   - Returns an error if extracting the SBOM version fails.
+//   - Returns an error if loading the schema fails.
+// Note:
+//   - This function abstracts multiple lower-level functions, such as `DetectSBOMType`, 
+//     `ExtractVersion`, `LoadSchema`, and `ValidateSBOM`. Instead of calling those 
+//     individually, use `ValidateSBOMData` for a streamlined validation process.
+//
+// Example usage:
+//   isValid, errors, err := ValidateSBOMData(sbomBytes)
+//   if err != nil {
+//       log.Fatalf("SBOM validation failed: %v", err)
+//   }
+//   if isValid {
+//       fmt.Println("SBOM is valid!")
+//   } else {
+//       fmt.Println("SBOM validation errors:", errors)
+//   }
+func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
+	if isJSON(sbomContent) {
+		sbomType, err := DetectSBOMType(string(sbomContent))
+		if err != nil {
+			return false, nil, fmt.Errorf("error detecting SBOM Type %s", err.Error())
+		}
+
+		if sbomType != SBOM_CYCLONEDX {
+			return false, nil, fmt.Errorf("only CycloneDX is currenty supported")
+		}
+
+		sbomSchemaVersion, err := ExtractVersion(string(sbomContent), SBOM_CYCLONEDX)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to extract version: %v", err)
+		}
+
+		schema, err := LoadSchema(sbomSchemaVersion, SBOM_CYCLONEDX)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to load schema: %v", err)
+		}
+
+		return ValidateSBOM(schema, string(sbomContent))
+
+	} else {
+		return false, nil, fmt.Errorf("unsupported file format")
+	}
+}
 
 // ValidateSBOM validates an SBOM JSON object against a provided SBOM schema.
 //
@@ -50,7 +157,7 @@ var schemaFS embed.FS
 //	}
 func ValidateSBOM(schemaSBOM, sbomData string) (bool, []string, error) {
 	if !isValidJSON(sbomData) {
-		return false, nil, errors.New("invalid JSON format")
+		return false, nil, fmt.Errorf("invalid JSON format")
 	}
 
 	schemaLoader := gojsonschema.NewStringLoader(schemaSBOM)
@@ -101,20 +208,28 @@ func ExtractVersion(jsonData string, sbomType string) (string, error) {
 	var obj map[string]interface{}
 
 	if err := json.Unmarshal([]byte(jsonData), &obj); err != nil {
-		return "", errors.New("invalid JSON format")
+		return "", fmt.Errorf("invalid JSON format")
 	}
 
-	if sbomType == "CycloneDX" {
+	if sbomType == SBOM_CYCLONEDX {
 		version, ok := obj["specVersion"].(string)
 		if !ok {
-			return "", errors.New(`"specVersion" field missing or not a string`)
+			return "", fmt.Errorf(`"specVersion" field missing or not a string`)
 		}
 
 		log.Println("CycloneDX version is set to:", version)
 		return version, nil
+	} else if sbomType == SBOM_SPDX {
+		version, ok := obj["spdxVersion"].(string)
+		if !ok {
+			return "", fmt.Errorf(`"spdxVersion" field missing or not a string`)
+		}
+
+		log.Println("SPDX version is set to:", version)
+		return version, nil
 	}
 
-	return "", errors.New("unknown SBOM Format")
+	return "", fmt.Errorf("unknown SBOM Format")
 }
 
 // isValidJSON checks whether a given string contains valid JSON.
@@ -171,73 +286,4 @@ func LoadSchema(version string, sbomType string) (string, error) {
 	}
 
 	return string(data), nil
-}
-
-// DetectSBOMType identifies the SBOM format based on the JSON structure.
-//
-// This function parses the provided SBOM JSON data and detects its type by checking the "bomFormat" field.
-// It returns the detected SBOM type as a string (e.g., "CycloneDX").
-//
-// Parameters:
-//   - jsonData: A string containing the SBOM JSON data.
-//
-// Returns:
-//   - A string representing the detected SBOM format.
-//   - An error if the JSON is invalid or the "bomFormat" field is missing.
-//
-// Example:
-//
-//	sbomType, err := DetectSBOMType(`{"bomFormat": "CycloneDX", "specVersion": "1.4"}`)
-//	if err != nil {
-//	    log.Fatalf("Failed to detect SBOM type: %v", err)
-//	}
-//	fmt.Println("Detected SBOM type:", sbomType) // Output: "CycloneDX"
-func DetectSBOMType(jsonData string) (string, error) {
-
-	obj, err := ParseJSON(jsonData)
-	if err != nil {
-		return "", err
-	}
-
-	// CycloneDX contains a bomFormat field
-	bomFormat, ok := obj["bomFormat"].(string)
-	if ok {
-		log.Println("CycloneDX SBOM type detected")
-		return bomFormat, nil
-	}
-
-	spdxVersion, ok := obj["spdxVersion"].(string)
-	if ok {
-		return "", fmt.Errorf("SPDX is not currently supported - %v", spdxVersion)
-	}
-
-	return "", fmt.Errorf("unknown SBOM type or missing required fields")
-}
-
-func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
-	if isJSON(sbomContent) {
-		sbomType, err := DetectSBOMType(string(sbomContent))
-		if err != nil {
-			return false, nil, fmt.Errorf("error detecting SBOM Type %s", err.Error())
-		}
-
-		if sbomType != SBOM_CYCLONEDX {
-			return false, nil, fmt.Errorf("only CycloneDX is currenty supported")
-		}
-
-		sbomSchemaVersion, err := ExtractVersion(string(sbomContent), SBOM_CYCLONEDX)
-		if err != nil {
-			return false, nil, fmt.Errorf("failed to extract version: %v", err)
-		}
-
-		schema, err := LoadSchema(sbomSchemaVersion, SBOM_CYCLONEDX)
-		if err != nil {
-			return false, nil, fmt.Errorf("failed to load schema: %v", err)
-		}
-
-		return ValidateSBOM(schema, string(sbomContent))
-
-	} else {
-		return false, nil, fmt.Errorf("unsupported file format")
-	}
 }
