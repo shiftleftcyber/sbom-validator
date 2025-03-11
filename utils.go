@@ -10,7 +10,7 @@ func isJSON(data []byte) bool {
 	return json.Unmarshal(data, &js) == nil
 }
 
-func ParseJSON(jsonData string) (map[string]interface{}, error) {
+func parseJSON(jsonData string) (map[string]interface{}, error) {
 	var obj map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonData), &obj); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
