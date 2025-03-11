@@ -1,12 +1,12 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    "log"
-    "os"
+	"flag"
+	"fmt"
+	"log"
+	"os"
 
-    "github.com/shiftleftcyber/sbom-validator"
+	"github.com/shiftleftcyber/sbom-validator"
 )
 
 // main serves as a reference implementation for SBOM validation.
@@ -31,58 +31,36 @@ import (
 //	go run main.go -file=samples/juice-shop-17.1.1.cdx.json
 func main() {
 
-    sbomPath := flag.String("file", "", "Path to the SBOM JSON file")
+	sbomPath := flag.String("file", "", "Path to the SBOM JSON file")
+	flag.Parse()
 
-    flag.Parse()
+	// Ensure the file path is provided
+	if *sbomPath == "" {
+		log.Fatal("Usage: go run main.go -file=<path-to-sbom.json>")
+	}
 
-    // Ensure the file path is provided
-    if *sbomPath == "" {
-        log.Fatal("Usage: go run main.go -file=<path-to-sbom.json>")
-    }
+	// Read SBOM file
+	jsonData, err := os.ReadFile(*sbomPath)
+	if err != nil {
+		log.Fatalf("Failed to read SBOM file: %v", err)
+	}
 
-    // Read SBOM file
-    jsonData, err := os.ReadFile(*sbomPath)
-    if err != nil {
-        log.Fatalf("Failed to read SBOM file: %v", err)
-    }
+	isValid, validationErrors, err := sbomvalidator.ValidateSBOMData(jsonData)
+	if err != nil {
+		log.Fatalf("Error during validation - %v", err)
+	}
 
-    // Get SBOM Type
-    sbomType, err := sbomvalidator.DetectSBOMType(string(jsonData))
-    if err != nil {
-        log.Fatalf("Failed to extract bomFormat: %v", err)
-    }
-    fmt.Println("Detected SBOM Type:", sbomType)
+	if isValid {
+		fmt.Println("SBOM is valid")
+	} else {
+		fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
 
-    // Extract version
-    version, err := sbomvalidator.ExtractVersion(string(jsonData), sbomType)
-    if err != nil {
-        log.Fatalf("Failed to extract version: %v", err)
-    }
-    fmt.Println("Detected JSON Version:", version)
-
-    // Load schema from schemas directory
-    schema, err := sbomvalidator.LoadSchema(version, sbomType)
-    if err != nil {
-        log.Fatalf("Failed to load schema: %v", err)
-    }
-
-    // Validate JSON against the selected schema
-    valid, errors, err := sbomvalidator.ValidateSBOM(schema, string(jsonData))
-    if err != nil {
-        log.Fatalf("Validation error: %v", err)
-    }
-
-    if valid {
-        fmt.Println("JSON is valid!")
-    } else {
-        fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
-
-        for i, errMsg := range errors {
-            if i >= 10 {
-                fmt.Printf("...and %d more errors.\n", len(errors)-10)
-                break
-            }
-            fmt.Printf("- %s\n", errMsg)
-        }
-    }
+		for i, errMsg := range validationErrors {
+			if i >= 10 {
+				fmt.Printf("...and %d more errors.\n", len(validationErrors)-10)
+				break
+			}
+			fmt.Printf("- %s\n", errMsg)
+		}
+	}
 }

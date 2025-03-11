@@ -25,7 +25,7 @@ SBOM specifications. It ensures compliance with formats like
 Use `go get` to install the package:
 
 ```sh
-go get github.com/shiftleftcyber/sbom-validator/sbomvalidator
+go get github.com/shiftleftcyber/sbom-validator
 ```
 
 ## Usage
@@ -39,43 +39,41 @@ import (
     "log"
     "os"
 
-    "github.com/shiftleftcyber/sbom-validator/sbomvalidator"
+    "github.com/shiftleftcyber/sbom-validator"
 )
 
 func main() {
-    sbomPath := "path/to/sbom.json"
 
-    jsonData, err := os.ReadFile(sbomPath)
+    sbomPath := flag.String("file", "", "Path to the SBOM JSON file")
+    flag.Parse()
+
+    // Ensure the file path is provided
+    if *sbomPath == "" {
+        log.Fatal("Usage: go run main.go -file=<path-to-sbom.json>")
+    }
+
+    // Read SBOM file
+    jsonData, err := os.ReadFile(*sbomPath)
     if err != nil {
         log.Fatalf("Failed to read SBOM file: %v", err)
     }
 
-    sbomType, err := sbomvalidator.DetectSBOMType(string(jsonData))
+    isValid, validationErrors, err := sbomvalidator.ValidateSBOMData(jsonData)
     if err != nil {
-        log.Fatalf("Failed to detect SBOM type: %v", err)
+        log.Fatalf("Error during validation - %v", err)
     }
 
-    version, err := sbomvalidator.ExtractVersion(string(jsonData), sbomType)
-    if err != nil {
-        log.Fatalf("Failed to extract SBOM version: %v", err)
-    }
-
-    schema, err := sbomvalidator.LoadSchema(version, "schemas", sbomType)
-    if err != nil {
-        log.Fatalf("Failed to load schema: %v", err)
-    }
-
-    valid, errors, err := sbomvalidator.ValidateSBOM(schema, string(jsonData))
-    if err != nil {
-        log.Fatalf("Validation error: %v", err)
-    }
-
-    if valid {
-        fmt.Println("SBOM is valid!")
+    if isValid {
+        fmt.Println("SBOM is valid")
     } else {
-        fmt.Println("SBOM validation failed:")
-        for _, errMsg := range errors {
-            fmt.Println("- " + errMsg)
+        fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
+
+        for i, errMsg := range validationErrors {
+            if i >= 10 {
+                fmt.Printf("...and %d more errors.\n", len(validationErrors)-10)
+                break
+            }
+            fmt.Printf("- %s\n", errMsg)
         }
     }
 }
@@ -84,7 +82,6 @@ func main() {
 ## Running Tests
 
 ```sh
-cd sbomvalidator
 go test ./...
 ```
 
