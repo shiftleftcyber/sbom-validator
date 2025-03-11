@@ -109,7 +109,7 @@ func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
 //	fmt.Println("Detected SBOM type:", sbomType) // Output: "CycloneDX"
 func detectSBOMType(jsonData string) (string, error) {
 
-	obj, err := ParseJSON(jsonData)
+	obj, err := parseJSON(jsonData)
 	if err != nil {
 		return "", err
 	}
