@@ -68,7 +68,7 @@ func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
 		}
 
 		if sbomType != SBOM_CYCLONEDX {
-			return false, nil, fmt.Errorf("only CycloneDX is currenty supported")
+			return false, nil, fmt.Errorf("only CycloneDX is currently supported")
 		}
 
 		sbomSchemaVersion, err := extractSBOMVersion(string(sbomContent), SBOM_CYCLONEDX)
