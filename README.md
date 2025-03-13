@@ -3,6 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/sbom-validator.svg)](https://pkg.go.dev/github.com/shiftleftcyber/sbom-validator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/shiftleftcyber/sbom-validator)](https://goreportcard.com/report/github.com/shiftleftcyber/sbom-validator)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/shiftleftcyber/sbom-validator)
 
 
 ## Overview
@@ -18,7 +19,7 @@ SBOM specifications. It ensures compliance with formats like
 
 ✅ Extracts SBOM version
 
-✅ Validates SBOM JSON against official schemas
+✅ Validates SBOM against official schemas
 
 ✅ Provides detailed validation errors
 
