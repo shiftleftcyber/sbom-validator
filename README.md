@@ -2,6 +2,8 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/sbom-validator.svg)](https://pkg.go.dev/github.com/shiftleftcyber/sbom-validator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/shiftleftcyber/sbom-validator)](https://goreportcard.com/report/github.com/shiftleftcyber/sbom-validator)
+
 
 ## Overview
 
