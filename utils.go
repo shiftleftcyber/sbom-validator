@@ -3,6 +3,7 @@ package sbomvalidator
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 func isJSON(data []byte) bool {
@@ -37,4 +38,14 @@ func parseJSON(jsonData string) (map[string]interface{}, error) {
 func isValidJSON(jsonStr string) bool {
 	var js json.RawMessage
 	return json.Unmarshal([]byte(jsonStr), &js) == nil
+}
+
+// For SPDX SBOMs the version is enbedded into the type: ie: spdxVersion: SPDX-2.3
+// This function returns the version (2.3)
+func getSPDXVersion(spdxVersion string) (string, error) {
+	parts := strings.SplitN(spdxVersion, "-", 2)
+	if len(parts) != 2 || parts[1] == "" {
+		return "", fmt.Errorf("invalid SPDX version format: %s", spdxVersion)
+	}
+	return parts[1], nil
 }
