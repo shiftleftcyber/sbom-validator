@@ -93,10 +93,10 @@ func TestParseJSON(t *testing.T) {
 
 func TestGetSPDXVersion(t *testing.T) {
 	tests := []struct {
-		name         string
-		spdxVersion  string
-		expected     string
-		expectError  bool
+		name        string
+		spdxVersion string
+		expected    string
+		expectError bool
 	}{
 		{
 			name:        "Valid SPDX version",

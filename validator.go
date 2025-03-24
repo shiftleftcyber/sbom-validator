@@ -219,7 +219,7 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 
 		log.Println("CycloneDX version is set to:", version)
 		return version, nil
-	// SPDX SBOMs have the version embedded into the spdxVersion filed
+		// SPDX SBOMs have the version embedded into the spdxVersion filed
 	} else if strings.Contains(sbomType, SBOM_SPDX) {
 		version, ok := obj["spdxVersion"].(string)
 		if !ok {
