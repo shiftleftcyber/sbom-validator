@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -16,7 +17,7 @@ const (
 
 // Embed all JSON schema files from the schemas/cyclonedx directory
 //
-//go:embed schemas/cyclonedx/*.json
+//go:embed schemas/cyclonedx/*.json schemas/spdx/*.json
 var schemaFS embed.FS
 
 // ValidateSBOMData is the main function to validate SBOM data using this library.
@@ -67,16 +68,12 @@ func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
 			return false, nil, fmt.Errorf("error detecting SBOM Type %s", err.Error())
 		}
 
-		if sbomType != SBOM_CYCLONEDX {
-			return false, nil, fmt.Errorf("only CycloneDX is currently supported")
-		}
-
-		sbomSchemaVersion, err := extractSBOMVersion(string(sbomContent), SBOM_CYCLONEDX)
+		sbomSchemaVersion, err := extractSBOMVersion(string(sbomContent), sbomType)
 		if err != nil {
 			return false, nil, fmt.Errorf("failed to extract version: %v", err)
 		}
 
-		schema, err := loadSBOMSchema(sbomSchemaVersion, SBOM_CYCLONEDX)
+		schema, err := loadSBOMSchema(sbomSchemaVersion, sbomType)
 		if err != nil {
 			return false, nil, fmt.Errorf("failed to load schema: %v", err)
 		}
@@ -115,15 +112,16 @@ func detectSBOMType(jsonData string) (string, error) {
 	}
 
 	// CycloneDX contains a bomFormat field
-	bomFormat, ok := obj["bomFormat"].(string)
+	cyclonedxFormat, ok := obj["bomFormat"].(string)
 	if ok {
-		log.Println("CycloneDX SBOM type detected")
-		return bomFormat, nil
+		log.Printf("%s SBOM type detected", cyclonedxFormat)
+		return cyclonedxFormat, nil
 	}
 
 	spdxVersion, ok := obj["spdxVersion"].(string)
 	if ok {
-		return "", fmt.Errorf("SPDX is not currently supported - %v", spdxVersion)
+		log.Printf("%s SBOM type detected", spdxVersion)
+		return spdxVersion, nil
 	}
 
 	return "", fmt.Errorf("unknown SBOM type or missing required fields")
@@ -221,7 +219,8 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 
 		log.Println("CycloneDX version is set to:", version)
 		return version, nil
-	} else if sbomType == SBOM_SPDX {
+		// SPDX SBOMs have the version embedded into the spdxVersion filed
+	} else if strings.Contains(sbomType, SBOM_SPDX) {
 		version, ok := obj["spdxVersion"].(string)
 		if !ok {
 			return "", fmt.Errorf(`"spdxVersion" field missing or not a string`)
@@ -256,11 +255,19 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 //	}
 //	fmt.Println("Schema content loaded successfully.")
 func loadSBOMSchema(version string, sbomType string) (string, error) {
-	if sbomType != SBOM_CYCLONEDX {
+	var schemaFile string
+
+	if sbomType == SBOM_CYCLONEDX {
+		schemaFile = fmt.Sprintf("schemas/cyclonedx/bom-%s.schema.json", version)
+	} else if strings.Contains(sbomType, SBOM_SPDX) {
+		spdxVersion, err := getSPDXVersion(version)
+		if err != nil {
+			return "", fmt.Errorf("failed to extract SPDX version")
+		}
+		schemaFile = fmt.Sprintf("schemas/spdx/spdx-%s.schema.json", spdxVersion)
+	} else {
 		return "", fmt.Errorf("unsupported SBOM type: %s", sbomType)
 	}
-
-	schemaFile := fmt.Sprintf("schemas/cyclonedx/bom-%s.schema.json", version)
 
 	data, err := schemaFS.ReadFile(schemaFile)
 	if err != nil {

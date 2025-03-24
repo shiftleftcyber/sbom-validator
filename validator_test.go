@@ -21,12 +21,18 @@ func TestDetectSBOMType(t *testing.T) {
 		{
 			name:      "Valid SPDX SBOM",
 			jsonData:  `{"specVersion": "SPDX", "spdxVersion": "SPDX-2.3"}`,
-			want:      "SPDX",
-			expectErr: true,
+			want:      "SPDX-2.3",
+			expectErr: false,
 		},
 		{
 			name:      "Missing bomFormat field",
 			jsonData:  `{"specVersion": "1.4"}`,
+			expectErr: true,
+		},
+		{
+			name:      "Missing specVersion field",
+			jsonData:  `{"specVersion": "SPDX"}`,
+			want:      "SPDX-2.3",
 			expectErr: true,
 		},
 		{
