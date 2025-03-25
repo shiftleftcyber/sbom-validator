@@ -2,3 +2,4 @@ shiftsbom-validator
 bin/
 coverage/
 coverage.out
+sbom-validator.*.cdx.json
