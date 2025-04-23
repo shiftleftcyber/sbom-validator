@@ -1,0 +1,66 @@
+name: Generate and Sign SBOM
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  SBOM_OUTPUT: sbom-source.json
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Generate SBOM
+        uses: CycloneDX/gh-gomod-generate-sbom@v2
+        with:
+          version: v1
+          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-sbom
+          path: sbom-validator.${{ github.ref_name }}.cdx.json
+
+  sign-and-archive-sbom:
+    name: Sign and Archive SBOM
+    needs: generate-sbom
+    runs-on: ubuntu-latest
+    env:
+      SIGN_API_URL: https://secure-sbom-api-demo-slc-gateway-dhncnyq8.uc.gateway.dev/signdx
+      SECURE_SBOM_KEY_ID: ${{ secrets.SECURE_SBOM_KEY_ID }}
+
+    steps:
+      - name: Download unsigned SBOM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-sbom
+
+      - name: Sign SBOM using Secure SBOM API
+        run: |
+          curl --fail -s -X POST ${SIGN_API_URL}?signtype=simple \
+            -F "key_id=${SECURE_SBOM_KEY_ID}" \
+            -F "sbom=@sbom-validator.${{ github.ref_name }}.cdx.json" \
+            -o sbom-validator.${{ github.ref_name }}.cdx.signed.json
+
+      - name: Upload signed SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-sbom
+          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          retention-days: 7
