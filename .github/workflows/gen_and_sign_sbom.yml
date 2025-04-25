@@ -74,9 +74,9 @@ jobs:
 
       - name: Sign SBOM using Secure SBOM API
         run: |
-          curl --fail -s -X POST ${SIGN_API_URL}?signtype=simple \
-            -F "key_id=${SECURE_SBOM_KEY_ID}" \
-            -F "sbom=@${{ env.SBOM_FILENAME }}" \
+          curl --fail -s -X POST ${SIGN_API_URL}?sigType=simple \
+            -F "keyid=${SECURE_SBOM_KEY_ID}" \
+            -F "file=@${{ env.SBOM_FILENAME }}" \
             -o tmp.cdx.signed.json
       
       - name: Rename signed SBOM to follow naming convention
