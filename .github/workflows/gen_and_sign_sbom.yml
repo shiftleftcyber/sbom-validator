@@ -24,18 +24,31 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.21'
+      
+      - name: Set SBOM file name
+        run: |
+          SAFE_REF_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          SAFE_REF_NAME="${SAFE_REF_NAME//\//-}"
+          echo "SBOM_NAME=sbom-validator.${SAFE_REF_NAME}.cdx.json" >> $GITHUB_ENV
+          echo "sbom-validator.${SAFE_REF_NAME}.cdx.json" > sbom_filename.txt
 
       - name: Generate SBOM
         uses: CycloneDX/gh-gomod-generate-sbom@v2
         with:
           version: v1
-          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
+          args: mod -licenses -json -output-version 1.6 -output ${{ env.SBOM_NAME }}
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.json
+          path: ${{ env.SBOM_NAME }}
+    
+      - name: Upload SBOM filename
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-filename
+          path: sbom_filename.txt
 
   sign-and-archive-sbom:
     name: Sign and Archive SBOM
@@ -50,17 +63,31 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unsigned-sbom
+      
+      - name: Download SBOM filename
+        uses: actions/download-artifact@v4
+        with:
+            name: sbom-filename
+
+      - name: Set SBOM_FILENAME env var
+        run: echo "SBOM_FILENAME=$(cat sbom_filename.txt)" >> $GITHUB_ENV
 
       - name: Sign SBOM using Secure SBOM API
         run: |
           curl --fail -s -X POST ${SIGN_API_URL}?signtype=simple \
             -F "key_id=${SECURE_SBOM_KEY_ID}" \
-            -F "sbom=@sbom-validator.${{ github.ref_name }}.cdx.json" \
-            -o sbom-validator.${{ github.ref_name }}.cdx.signed.json
+            -F "sbom=@${{ env.SBOM_FILENAME }}" \
+            -o tmp.cdx.signed.json
+      
+      - name: Rename signed SBOM to follow naming convention
+        run: |
+          SIGNED_SBOM_NAME="${SBOM_FILENAME%.cdx.json}.cdx.signed.json"
+          mv tmp.cdx.signed.json "$SIGNED_SBOM_NAME"
+          echo "SIGNED_SBOM_NAME=$SIGNED_SBOM_NAME" >> $GITHUB_ENV
 
       - name: Upload signed SBOM
         uses: actions/upload-artifact@v4
         with:
           name: signed-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          path: ${{ env.SIGNED_SBOM_NAME }}
           retention-days: 7
