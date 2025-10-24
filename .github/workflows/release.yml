@@ -1,0 +1,46 @@
+name: GoReleaser
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    name: 🚀 Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+          check-latest: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Signed SBOM to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            sbom-validator.${{ github.ref_name }}.cdx.signed.json
+
+      - name: Add Job Summary
+        run: |
+          echo "### 🚀 Release Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GoReleaser successfully published binaries and SBOM" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔏 Signed SBOM attached to GitHub release" >> $GITHUB_STEP_SUMMARY
