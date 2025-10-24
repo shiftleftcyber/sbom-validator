@@ -1,0 +1,47 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 🧩 Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Build
+        run: |
+          go version
+          go build -o bin/sbom-validator-example example/main.go
+
+      - name: Run Tests
+        run: |
+          go test -v -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.out
+
+      - name: Add Job Summary
+        run: |
+          echo "### ✅ Build & Test Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Unit tests passed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Coverage Summary:" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -n 1 >> $GITHUB_STEP_SUMMARY
