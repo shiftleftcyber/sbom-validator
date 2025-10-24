@@ -5,7 +5,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/shiftleftcyber/sbom-validator)](https://goreportcard.com/report/github.com/shiftleftcyber/sbom-validator)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/shiftleftcyber/sbom-validator)
 
-
 ## Overview
 
 **sbom-validator** is a Go library designed to validate
@@ -92,6 +91,19 @@ or you can use the included Makefile
 
 ```sh
 make test
+```
+
+## Running the example
+
+You can build an example app and pass in an SBOM
+
+```sh
+make build
+
+./bin/sbom-validator-example -file sample-sboms/sample-1.6.cdx.json
+CycloneDX SBOM type detected
+CycloneDX version is set to: 1.6
+SBOM is valid
 ```
 
 ## License
