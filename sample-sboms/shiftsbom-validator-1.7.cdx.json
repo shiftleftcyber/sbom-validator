@@ -1,0 +1,650 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:66b81c67-a7e0-4b75-8309-3f0ed721665b",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-24T11:27:13Z",
+    "tools": {
+      "components": [
+        {
+          "group": "@cyclonedx",
+          "name": "cdxgen",
+          "version": "11.10.0",
+          "purl": "pkg:npm/%40cyclonedx/cdxgen@11.10.0",
+          "type": "application",
+          "bom-ref": "pkg:npm/@cyclonedx/cdxgen@11.10.0",
+          "publisher": "OWASP Foundation",
+          "authors": [
+            {
+              "name": "OWASP Foundation"
+            }
+          ]
+        }
+      ]
+    },
+    "authors": [
+      {
+        "name": "OWASP Foundation"
+      }
+    ],
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
+    "distributionConstraints": {
+      "tlp": "CLEAR"
+    },
+    "component": {
+      "group": "",
+      "name": "github.com/shiftleftcyber/sbom-validator",
+      "version": "",
+      "purl": "pkg:golang/github.com/shiftleftcyber/sbom-validator",
+      "bom-ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator",
+      "scope": "required",
+      "properties": [
+        {
+          "name": "SrcGoMod",
+          "value": "/Users/cosimocommisso/dev/shiftLeftCyberIO/ShiftSBOM-Validator/go.mod"
+        },
+        {
+          "name": "ModuleGoVersion",
+          "value": "1.21.0"
+        },
+        {
+          "name": "cdx:go:indirect",
+          "value": "false"
+        }
+      ],
+      "type": "application"
+    },
+    "properties": [
+      {
+        "name": "cdx:bom:componentTypes",
+        "value": "github\\ngolang"
+      },
+      {
+        "name": "cdx:bom:componentNamespaces",
+        "value": "CycloneDX\\nactions\\ngithub.com/xeipuuv\\ngithub/codeql-action\\ngolangci\\ngoreleaser"
+      },
+      {
+        "name": "cdx:bom:componentSrcFiles",
+        "value": ".github/workflows/codeql-analysis.yml\\n.github/workflows/go.yml\\n.github/workflows/golangci-lint.yml\\n.github/workflows/goreleaser.yml\\ngo.mod"
+      }
+    ]
+  },
+  "components": [
+    {
+      "group": "",
+      "name": "github.com/xeipuuv/gojsonpointer",
+      "version": "v0.0.0-20180127040702-4e3ac2762d5f",
+      "scope": "optional",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "376cf1952ca22927b9797d6d6558911f9400d2a8a3a840eb61988f1008aadf05"
+        }
+      ],
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f",
+      "type": "library",
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f",
+      "properties": [
+        {
+          "name": "SrcGoMod",
+          "value": "/Users/cosimocommisso/go/pkg/mod/cache/download/github.com/xeipuuv/gojsonpointer/@v/v0.0.0-20180127040702-4e3ac2762d5f.mod"
+        },
+        {
+          "name": "ModuleGoVersion",
+          "value": ""
+        },
+        {
+          "name": "cdx:go:indirect",
+          "value": "true"
+        },
+        {
+          "name": "SrcFile",
+          "value": "go.mod"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.5,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.5,
+                "value": "go.mod"
+              }
+            ],
+            "concludedValue": "go.mod"
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "github.com/xeipuuv/gojsonreference",
+      "version": "v0.0.0-20180127040603-bd5ef7bd5415",
+      "scope": "optional",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1b0ae316625c170e80b7f1aceb3e328e2230cee275ffe5302f13100d54174a14"
+        }
+      ],
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415",
+      "type": "library",
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415",
+      "properties": [
+        {
+          "name": "SrcGoMod",
+          "value": "/Users/cosimocommisso/go/pkg/mod/cache/download/github.com/xeipuuv/gojsonreference/@v/v0.0.0-20180127040603-bd5ef7bd5415.mod"
+        },
+        {
+          "name": "ModuleGoVersion",
+          "value": ""
+        },
+        {
+          "name": "cdx:go:indirect",
+          "value": "true"
+        },
+        {
+          "name": "SrcFile",
+          "value": "go.mod"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.5,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.5,
+                "value": "go.mod"
+              }
+            ],
+            "concludedValue": "go.mod"
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "github.com/xeipuuv/gojsonschema",
+      "version": "v1.2.0",
+      "scope": "required",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6a76119ff25570e2b6660194f888c45789f0961a0ae6c425bb1b1827bf087776"
+        }
+      ],
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0",
+      "type": "library",
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0",
+      "properties": [
+        {
+          "name": "SrcGoMod",
+          "value": "/Users/cosimocommisso/go/pkg/mod/cache/download/github.com/xeipuuv/gojsonschema/@v/v1.2.0.mod"
+        },
+        {
+          "name": "ModuleGoVersion",
+          "value": ""
+        },
+        {
+          "name": "cdx:go:indirect",
+          "value": "false"
+        },
+        {
+          "name": "SrcFile",
+          "value": "go.mod"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "go.mod"
+              }
+            ],
+            "concludedValue": "go.mod"
+          }
+        ]
+      }
+    },
+    {
+      "group": "actions",
+      "name": "checkout",
+      "version": "11bd71901bbe5b1630ceea73d27597364c9af683",
+      "purl": "pkg:github/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/goreleaser.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/codeql-analysis.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/codeql-analysis.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/codeql-analysis.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "actions",
+      "name": "setup-go",
+      "version": "3041bf56c941b39c61721a86cd11f3bb1338122a",
+      "purl": "pkg:github/actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/goreleaser.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/goreleaser.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/goreleaser.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "CycloneDX",
+      "name": "gh-gomod-generate-sbom",
+      "version": "v2",
+      "purl": "pkg:github/CycloneDX/gh-gomod-generate-sbom@v2",
+      "type": "application",
+      "bom-ref": "pkg:github/CycloneDX/gh-gomod-generate-sbom@v2",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/goreleaser.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/goreleaser.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/goreleaser.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "goreleaser",
+      "name": "goreleaser-action",
+      "version": "9ed2f89a662bf1735a48bc8557fd212fa902bebf",
+      "purl": "pkg:github/goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf",
+      "type": "application",
+      "bom-ref": "pkg:github/goreleaser/goreleaser-action@9ed2f89a662bf1735a48bc8557fd212fa902bebf",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/goreleaser.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/goreleaser.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/goreleaser.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "actions",
+      "name": "upload-artifact",
+      "version": "v4",
+      "purl": "pkg:github/actions/upload-artifact@v4",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/upload-artifact@v4",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/goreleaser.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/goreleaser.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/goreleaser.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "actions",
+      "name": "checkout",
+      "version": "v4",
+      "purl": "pkg:github/actions/checkout@v4",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/checkout@v4",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/golangci-lint.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/go.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/go.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/go.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "actions",
+      "name": "setup-go",
+      "version": "v4",
+      "purl": "pkg:github/actions/setup-go@v4",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/setup-go@v4",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/golangci-lint.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/go.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/go.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/go.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "golangci",
+      "name": "golangci-lint-action",
+      "version": "v6",
+      "purl": "pkg:github/golangci/golangci-lint-action@v6",
+      "type": "application",
+      "bom-ref": "pkg:github/golangci/golangci-lint-action@v6",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/golangci-lint.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/golangci-lint.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/golangci-lint.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "github/codeql-action",
+      "name": "init",
+      "version": "b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "purl": "pkg:github/github/codeql-action/init@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "type": "application",
+      "bom-ref": "pkg:github/github/codeql-action/init@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/codeql-analysis.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/codeql-analysis.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/codeql-analysis.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "github/codeql-action",
+      "name": "autobuild",
+      "version": "b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "purl": "pkg:github/github/codeql-action/autobuild@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "type": "application",
+      "bom-ref": "pkg:github/github/codeql-action/autobuild@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/codeql-analysis.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/codeql-analysis.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/codeql-analysis.yml"
+          }
+        ]
+      }
+    },
+    {
+      "group": "github/codeql-action",
+      "name": "analyze",
+      "version": "b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "purl": "pkg:github/github/codeql-action/analyze@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "type": "application",
+      "bom-ref": "pkg:github/github/codeql-action/analyze@b56ba49b26e50535fa1e7f7db0f4f7b4bf65d80d",
+      "properties": [
+        {
+          "name": "SrcFile",
+          "value": ".github/workflows/codeql-analysis.yml"
+        },
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.6,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.6,
+                "value": ".github/workflows/codeql-analysis.yml"
+              }
+            ],
+            "concludedValue": ".github/workflows/codeql-analysis.yml"
+          }
+        ]
+      }
+    }
+  ],
+  "services": [],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator",
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0"
+      ]
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0",
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f",
+        "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415"
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "bom-ref": "metadata-annotations",
+      "subjects": [
+        "pkg:golang/github.com/shiftleftcyber/sbom-validator"
+      ],
+      "annotator": {
+        "component": {
+          "group": "@cyclonedx",
+          "name": "cdxgen",
+          "version": "11.10.0",
+          "purl": "pkg:npm/%40cyclonedx/cdxgen@11.10.0",
+          "type": "application",
+          "bom-ref": "pkg:npm/@cyclonedx/cdxgen@11.10.0",
+          "publisher": "OWASP Foundation",
+          "authors": [
+            {
+              "name": "OWASP Foundation"
+            }
+          ]
+        }
+      },
+      "timestamp": "2025-10-24T11:27:13Z",
+      "text": "This Software Bill-of-Materials (SBOM) document was created on Friday, October 24, 2025 with cdxgen. The data was captured during the build lifecycle phase. The document describes an application named 'github.com/shiftleftcyber/sbom-validator'. There are 14 components. 2 package type(s) and 6 purl namespaces are described in the document under components."
+    }
+  ]
+}
