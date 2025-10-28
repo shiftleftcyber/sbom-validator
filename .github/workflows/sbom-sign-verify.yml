@@ -8,9 +8,11 @@ on:
       - 'v*'
 
 jobs:
-  sbom-sign-verify:
+  generate_sbom:
     name: 🔏 SBOM Lifecycle
     runs-on: ubuntu-latest
+    outputs:
+      sanitized_ref: ${{ steps.vars.outputs.sanitized_ref }}
 
     steps:
       - uses: actions/checkout@v4
@@ -20,19 +22,23 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      
+      - name: Sanitize branch name
+        id: vars
+        run: echo "sanitized_ref=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
 
       - name: Generate SBOM (CycloneDX)
         uses: CycloneDX/gh-gomod-generate-sbom@v2
         with:
           version: v1
-          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
+          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign SBOM
         uses: shiftleftcyber/secure-sbom-action@v1.3.1
         with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
+          sbom_file: sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
           secure_sbom_action: sign
           api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           key_id: ${{ secrets.SECURE_SBOM_KEYID }}
@@ -40,7 +46,7 @@ jobs:
       - name: Verify SBOM
         uses: shiftleftcyber/secure-sbom-action@v1.3.1
         with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          sbom_file: sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.signed.json
           secure_sbom_action: verify
           api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           key_id: ${{ secrets.SECURE_SBOM_KEYID }}
@@ -50,8 +56,8 @@ jobs:
         with:
           name: sbom-artifacts
           path: |
-            sbom-validator.${{ github.ref_name }}.cdx.json
-            sbom-validator.${{ github.ref_name }}.cdx.signed.json
+            sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
+            sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.signed.json
 
       - name: Add Job Summary
         run: |
@@ -61,7 +67,7 @@ jobs:
     
   osv-scan:
     name: 🔎 OSV Scan (Signed SBOM)
-    needs: sbom-sign-verify
+    needs: generate_sbom
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -80,8 +86,10 @@ jobs:
 
       - name: Run OSV Scanner
         run: |
+          SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
+          SAFE_REF="${SAFE_REF//\//-}"
           docker run --rm -v ${{ github.workspace }}:/scan ghcr.io/google/osv-scanner:latest \
-            scan /scan/sbom-validator.${{ github.ref_name }}.cdx.signed.json \
+            scan /scan/sbom-validator.${SAFE_REF}.cdx.signed.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
