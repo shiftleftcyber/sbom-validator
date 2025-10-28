@@ -88,11 +88,6 @@ jobs:
         run: |
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
-          pwd
-          ls -la
-          echo ${{ github.workspace }}
-          ls -la ${{ github.workspace }}
-          echo ${SAFE_REF}
           docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
             scan --lockfile sbom-validator.${SAFE_REF}.cdx.json \
             --format json --output osv-scan-report.json || true
@@ -104,8 +99,29 @@ jobs:
           path: osv-scan-report.json
     
       - name: Enforce Security Gate
+        id: enforce-gate
         run: |
-          jq '.results[] | select(.severity=="HIGH" or .severity=="CRITICAL")' osv-scan-report.json && {
-          echo "❌ Blocking release - high/critical vulnerabilities detected!"
-          exit 1
-          } || echo "✅ No blocking vulnerabilities found."
+          echo "🔍 Evaluating OSV scan results..."
+          COUNT=$(jq '[.results[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' osv-scan-report.json)
+          if [ "$COUNT" -gt 0 ]; then
+            echo "❌ Blocking release - $COUNT high/critical vulnerabilities detected!"
+            jq '.results[] | select(.severity == "HIGH" or .severity == "CRITICAL") | {package: .package.name, severity: .severity, summary: .summary}' osv-scan-report.json
+            echo "blocked=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ No blocking vulnerabilities found."
+            echo "blocked=false" >> $GITHUB_OUTPUT
+          fi
+    
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "### 🔒 OSV Vulnerability Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan file:** \`osv-scan-report.json\`" >> $GITHUB_STEP_SUMMARY
+          if [[ '${{ steps.enforce-gate.outputs.blocked }}' == 'true' ]]; then
+            echo "- ❌ **High/Critical vulnerabilities found — release blocked**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ **No blocking vulnerabilities detected — safe to proceed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For full report, download the [osv-scan-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
