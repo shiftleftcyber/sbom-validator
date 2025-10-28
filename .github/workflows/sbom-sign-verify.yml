@@ -58,3 +58,41 @@ jobs:
           echo "### 🔏 SBOM Lifecycle Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SBOM generated, signed, and verified successfully" >> $GITHUB_STEP_SUMMARY
           echo "- 📄 Artifacts uploaded for transparency" >> $GITHUB_STEP_SUMMARY
+    
+  osv-scan:
+    name: 🔎 OSV Scan (Signed SBOM)
+    needs: sbom-sign-verify
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Download Signed SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: .
+
+      - name: Run OSV Scanner
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/scan ghcr.io/google/osv-scanner:latest \
+            scan /scan/sbom-validator.${{ github.ref_name }}.cdx.signed.json \
+            --format json --output osv-scan-report.json || true
+
+      - name: Upload OSV Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-scan-report
+          path: osv-scan-report.json
+    
+      - name: Enforce Security Gate
+        run: |
+          jq '.vulnerabilities[] | select(.severity=="HIGH" or .severity=="CRITICAL")' osv-scan-report.json && {
+          echo "❌ Blocking release - high/critical vulnerabilities detected!"
+          exit 1
+          } || echo "✅ No blocking vulnerabilities found."
