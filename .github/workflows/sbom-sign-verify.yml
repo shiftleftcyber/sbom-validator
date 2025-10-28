@@ -26,6 +26,8 @@ jobs:
         with:
           version: v1
           args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign SBOM
         uses: shiftleftcyber/secure-sbom-action@v1.3.1
