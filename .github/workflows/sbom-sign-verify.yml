@@ -91,8 +91,8 @@ jobs:
           pwd
           ls -la
           echo ${SAFE_REF}
-          docker run --rm -v ${{ github.workspace }}:/scan ghcr.io/google/osv-scanner:latest \
-            scan sbom-validator.${SAFE_REF}.cdx.signed.json \
+          docker run --rm -v ${{ github.workspace }}:/opt ghcr.io/google/osv-scanner:latest \
+            scan /opt/sbom-validator.${SAFE_REF}.cdx.signed.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
