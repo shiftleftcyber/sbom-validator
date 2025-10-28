@@ -93,7 +93,7 @@ jobs:
           echo ${{ github.workspace }}
           ls -la ${{ github.workspace }}
           echo ${SAFE_REF}
-          docker run --rm -v ${{ github.workspace }}:/opt ghcr.io/google/osv-scanner:latest scan /opt/sbom-validator.feat-addOSVScanSchedule.cdx.signed.json --format json --output osv-scan-report.json || true
+          docker run --rm -v ${{ github.workspace }}:/opt ghcr.io/google/osv-scanner:latest scan --lockfile /opt/sbom-validator.feat-addOSVScanSchedule.cdx.signed.json --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
         uses: actions/upload-artifact@v4
