@@ -1,4 +1,4 @@
-name: SBOM Generation, Signing, and Verification
+name: SBOM Generation, Signing, & Vulnerability Scanning
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   generate_sbom:
-    name: 🔏 SBOM Lifecycle
+    name: 🔏 Generate & Sign SBOM
     runs-on: ubuntu-latest
     outputs:
       sanitized_ref: ${{ steps.vars.outputs.sanitized_ref }}
@@ -66,7 +66,7 @@ jobs:
           echo "- 📄 Artifacts uploaded for transparency" >> $GITHUB_STEP_SUMMARY
     
   osv-scan:
-    name: 🔎 OSV Scan (Signed SBOM)
+    name: 🔎 OSV Scan
     needs: generate_sbom
     runs-on: ubuntu-latest
     permissions:
