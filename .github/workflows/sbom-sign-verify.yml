@@ -105,7 +105,7 @@ jobs:
     
       - name: Enforce Security Gate
         run: |
-          jq '.vulnerabilities[] | select(.severity=="HIGH" or .severity=="CRITICAL")' osv-scan-report.json && {
+          jq '.results[] | select(.severity=="HIGH" or .severity=="CRITICAL")' osv-scan-report.json && {
           echo "❌ Blocking release - high/critical vulnerabilities detected!"
           exit 1
           } || echo "✅ No blocking vulnerabilities found."
