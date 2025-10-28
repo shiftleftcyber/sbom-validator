@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -45,19 +46,20 @@ func main() {
 		log.Fatalf("Failed to read SBOM file: %v", err)
 	}
 
-	isValid, validationErrors, err := sbomvalidator.ValidateSBOMData(jsonData)
+	result, err := sbomvalidator.ValidateSBOMData(jsonData)
 	if err != nil {
 		log.Fatalf("Error during validation - %v", err)
 	}
 
-	if isValid {
-		fmt.Println("SBOM is valid")
+	if result.IsValid {
+		output, _ := json.MarshalIndent(result, "", " ")
+		fmt.Println(string(output))
 	} else {
 		fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
 
-		for i, errMsg := range validationErrors {
+		for i, errMsg := range result.ValidationErrors {
 			if i >= 10 {
-				fmt.Printf("...and %d more errors.\n", len(validationErrors)-10)
+				fmt.Printf("...and %d more errors.\n", len(result.ValidationErrors)-10)
 				break
 			}
 			fmt.Printf("- %s\n", errMsg)

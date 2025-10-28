@@ -15,6 +15,15 @@ const (
 	SBOM_SPDX      = "SPDX"
 )
 
+type ValidationResult struct {
+	IsValid          bool     `json:"isValid"`
+	SBOMType         string   `json:"sbomType,omitempty"`
+	SBOMVersion      string   `json:"sbomVersion,omitempty"`
+	ValidationErrors []string `json:"validationErrors,omitempty"`
+	SchemaUsed       string   `json:"schemaUsed,omitempty"`
+	DetectedFormat   string   `json:"detectedFormat,omitempty"`
+}
+
 // Embed all JSON schema files from the schemas/cyclonedx directory
 //
 //go:embed schemas/cyclonedx/*.json schemas/spdx/*.json
@@ -61,27 +70,49 @@ var schemaFS embed.FS
 //	} else {
 //	    fmt.Println("SBOM validation errors:", errors)
 //	}
-func ValidateSBOMData(sbomContent []byte) (bool, []string, error) {
+func ValidateSBOMData(sbomContent []byte) (*ValidationResult, error) {
+	result := &ValidationResult{}
+
 	if isJSON(sbomContent) {
+		result.DetectedFormat = "JSON"
+
 		sbomType, err := detectSBOMType(string(sbomContent))
 		if err != nil {
-			return false, nil, fmt.Errorf("error detecting SBOM Type %s", err.Error())
+			return result, fmt.Errorf("error detecting SBOM Type %v", err)
 		}
+		result.SBOMType = sbomType
 
 		sbomSchemaVersion, err := extractSBOMVersion(string(sbomContent), sbomType)
 		if err != nil {
-			return false, nil, fmt.Errorf("failed to extract version: %v", err)
+			return result, fmt.Errorf("failed to extract SBOM version: %v", err)
 		}
+		result.SBOMVersion = sbomSchemaVersion
 
 		schema, err := loadSBOMSchema(sbomSchemaVersion, sbomType)
 		if err != nil {
-			return false, nil, fmt.Errorf("failed to load schema: %v", err)
+			return result, fmt.Errorf("failed to load schema: %v", err)
 		}
 
-		return validateSBOM(schema, string(sbomContent))
+		isValid, validationErrors, err := validateSBOM(schema, string(sbomContent))
+		if err != nil {
+			return result, fmt.Errorf("validation error: %v", err)
+		}
+
+		result.IsValid = isValid
+		result.ValidationErrors = validationErrors
+
+		// for SPDX SBOMs split the type and version (ie: SPDX-2.3)
+		if strings.HasPrefix(sbomType, SBOM_SPDX) {
+			result.SBOMType = SBOM_SPDX
+			result.SBOMVersion, _ = getSPDXVersion(sbomType)
+		}
+
+		return result, nil
 
 	} else {
-		return false, nil, fmt.Errorf("unsupported file format")
+		result.IsValid = false
+		result.DetectedFormat = "non-JSON"
+		return result, fmt.Errorf("unsupported file format")
 	}
 }
 

@@ -60,24 +60,25 @@ func main() {
         log.Fatalf("Failed to read SBOM file: %v", err)
     }
 
-    isValid, validationErrors, err := sbomvalidator.ValidateSBOMData(jsonData)
-    if err != nil {
-        log.Fatalf("Error during validation - %v", err)
-    }
+    result, err := sbomvalidator.ValidateSBOMData(jsonData)
+	if err != nil {
+		log.Fatalf("Error during validation - %v", err)
+	}
 
-    if isValid {
-        fmt.Println("SBOM is valid")
-    } else {
-        fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
+    if result.IsValid {
+		output, _ := json.MarshalIndent(result, "", " ")
+		fmt.Println(string(output))
+	} else {
+		fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
 
-        for i, errMsg := range validationErrors {
-            if i >= 10 {
-                fmt.Printf("...and %d more errors.\n", len(validationErrors)-10)
-                break
-            }
-            fmt.Printf("- %s\n", errMsg)
-        }
-    }
+		for i, errMsg := range result.ValidationErrors {
+			if i >= 10 {
+				fmt.Printf("...and %d more errors.\n", len(result.ValidationErrors)-10)
+				break
+			}
+			fmt.Printf("- %s\n", errMsg)
+		}
+	}
 }
 ```
 
@@ -103,7 +104,12 @@ make build
 ./bin/sbom-validator-example -file sample-sboms/sample-1.6.cdx.json
 CycloneDX SBOM type detected
 CycloneDX version is set to: 1.6
-SBOM is valid
+{
+ "isValid": true,
+ "sbomType": "CycloneDX",
+ "sbomVersion": "1.6",
+ "detectedFormat": "JSON"
+}
 ```
 
 ## License
