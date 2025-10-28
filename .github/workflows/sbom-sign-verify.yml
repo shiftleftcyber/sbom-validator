@@ -88,6 +88,9 @@ jobs:
         run: |
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
+          pwd
+          ls -la
+          echo ${SAFE_REF}
           docker run --rm -v ${{ github.workspace }}:/scan ghcr.io/google/osv-scanner:latest \
             scan /scan/sbom-validator.${SAFE_REF}.cdx.signed.json \
             --format json --output osv-scan-report.json || true
