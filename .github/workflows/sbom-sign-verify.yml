@@ -90,6 +90,8 @@ jobs:
           SAFE_REF="${SAFE_REF//\//-}"
           pwd
           ls -la
+          echo ${{ github.workspace }}
+          ls -la ${{ github.workspace }}
           echo ${SAFE_REF}
           docker run --rm -v ${{ github.workspace }}:/opt ghcr.io/google/osv-scanner:latest \
             scan /opt/sbom-validator.${SAFE_REF}.cdx.signed.json \
