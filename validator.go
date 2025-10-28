@@ -15,6 +15,18 @@ const (
 	SBOM_SPDX      = "SPDX"
 )
 
+// ValidationResult represents the outcome of validating a Software Bill of Materials (SBOM).
+//
+// It provides detailed information about the validation process, including:
+//   - Whether the SBOM is valid (`IsValid`).
+//   - The detected SBOM type (e.g., CycloneDX, SPDX).
+//   - The SBOM schema or specification version.
+//   - A list of any validation errors encountered.
+//   - The schema file or source used during validation.
+//   - The detected input format (e.g., JSON, XML, etc.).
+//
+// This struct is returned by `ValidateSBOMData` and can be serialized to JSON
+// for use in CLI tools, APIs, or automated pipelines.
 type ValidationResult struct {
 	IsValid          bool     `json:"isValid"`
 	SBOMType         string   `json:"sbomType,omitempty"`
