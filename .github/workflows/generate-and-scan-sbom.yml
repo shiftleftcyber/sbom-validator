@@ -1,125 +1,70 @@
-name: GoReleaser
+name: SBOM Generation, Signing, & Vulnerability Scanning
 
 on:
+  workflow_dispatch:
   push:
+    branches: [ main ]
     tags:
       - 'v*'
 
-permissions:
-  actions: read
-  security-events: write
-  contents: write
-
 jobs:
-  goreleaser:
-    name: 🚀 Release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.21"
-          check-latest: true
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Add Job Summary
-        run: |
-          echo "### 🚀 Release Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GoReleaser successfully published binaries and SBOM" >> $GITHUB_STEP_SUMMARY
-
   generate_sbom:
-    name: 🔏 Generate SBOM
+    name: 🔏 Generate & Sign SBOM
     runs-on: ubuntu-latest
-    needs: goreleaser
+    outputs:
+      sanitized_ref: ${{ steps.vars.outputs.sanitized_ref }}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
-          check-latest: true
+          go-version-file: 'go.mod'
+          cache: true
+      
+      - name: Sanitize branch name
+        id: vars
+        run: echo "sanitized_ref=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
 
       - name: Generate SBOM (CycloneDX)
         uses: CycloneDX/gh-gomod-generate-sbom@v2
         with:
           version: v1
-          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
+          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign SBOM
         uses: shiftleftcyber/secure-sbom-action@v1.3.1
         with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
+          sbom_file: sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
           secure_sbom_action: sign
+          api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+          key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+
+      - name: Verify SBOM
+        uses: shiftleftcyber/secure-sbom-action@v1.3.1
+        with:
+          sbom_file: sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.signed.json
+          secure_sbom_action: verify
           api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           key_id: ${{ secrets.SECURE_SBOM_KEYID }}
 
       - name: Upload SBOM Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.json
-          retention-days: 7
+          name: sbom-artifacts
+          path: |
+            sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.json
+            sbom-validator.${{ steps.vars.outputs.sanitized_ref }}.cdx.signed.json
 
       - name: Add Job Summary
         run: |
-          echo "### 🔏 SBOM Generated & Signed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ CycloneDX SBOM created" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔐 Signed with SecureSBOM API" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 Uploaded as release asset" >> $GITHUB_STEP_SUMMARY
-  
-  sign-sbom:
-    name: Sign SBOM via SecureSBOM
-    needs: generate_sbom
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Download Signed SBOM
-        uses: actions/download-artifact@v4
-        with:
-          name: unsigned-sbom
-          path: .
+          echo "### 🔏 SBOM Lifecycle Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SBOM generated, signed, and verified successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 Artifacts uploaded for transparency" >> $GITHUB_STEP_SUMMARY
     
-      - name: Sign SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@v1.3.1
-        with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
-          secure_sbom_action: sign
-          api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-          key_id: ${{ secrets.SECURE_SBOM_KEYID }}
-
-      - name: Upload Signed SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-          retention-days: 7
-
-      - name: Upload Signed SBOM to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-
   osv-scan:
     name: 🔎 OSV Scan
     needs: generate_sbom
@@ -136,13 +81,15 @@ jobs:
       - name: Download Signed SBOM
         uses: actions/download-artifact@v4
         with:
-          name: unsigned-sbom
+          name: sbom-artifacts
           path: .
 
       - name: Run OSV Scanner
         run: |
+          SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
+          SAFE_REF="${SAFE_REF//\//-}"
           docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
-            scan --lockfile sbom-validator.${{ github.ref_name }}.cdx.json \
+            scan --lockfile sbom-validator.${SAFE_REF}.cdx.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
@@ -178,4 +125,3 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "For full report, download the [osv-scan-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
-    

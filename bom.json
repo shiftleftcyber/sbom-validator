@@ -1,0 +1,165 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:6a398469-2e75-4417-ba49-fec05605bbbd",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-28T15:05:34-04:00",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "cyclonedx-gomod",
+        "version": "v1.9.0",
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "c6c5f03f799835bb36e362fc318060a9"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "84d406d0f348af1a3aaac90337f339f8e466ec86"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "71c1ce94e0e1888752379465ae4909192e8840fd72c012e612fc3bec581d1bfd"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "30553a172ee678508a633d30b6c8dff7bf7460ebb953b13e5fb76fc7d99a0acaef0e39762047bd854855b1bf28cea3ea"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "f8008743df4269ac6076ad68a303ecc24afac4d7bdc3fbbd8a7c3947a930d52c1e082f167049f67322e0c846a00c34615c68d2c989e461bbdf4c68215d5407ae"
+          }
+        ],
+        "externalReferences": [
+          {
+            "url": "https://github.com/CycloneDX/cyclonedx-gomod",
+            "type": "vcs"
+          },
+          {
+            "url": "https://cyclonedx.org",
+            "type": "website"
+          }
+        ]
+      }
+    ],
+    "component": {
+      "bom-ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v1.2.1-0.20251024123216-7578fac172e4?type=module",
+      "type": "application",
+      "name": "github.com/shiftleftcyber/sbom-validator",
+      "version": "v1.2.1-0.20251024123216-7578fac172e4",
+      "purl": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v1.2.1-0.20251024123216-7578fac172e4?type=module\u0026goos=darwin\u0026goarch=arm64",
+      "externalReferences": [
+        {
+          "url": "https://github.com/shiftleftcyber/sbom-validator",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module",
+      "type": "library",
+      "name": "github.com/xeipuuv/gojsonpointer",
+      "version": "v0.0.0-20180127040702-4e3ac2762d5f",
+      "scope": "required",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module\u0026goos=darwin\u0026goarch=arm64",
+      "externalReferences": [
+        {
+          "url": "https://github.com/xeipuuv/gojsonpointer",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module",
+      "type": "library",
+      "name": "github.com/xeipuuv/gojsonreference",
+      "version": "v0.0.0-20180127040603-bd5ef7bd5415",
+      "scope": "required",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module\u0026goos=darwin\u0026goarch=arm64",
+      "externalReferences": [
+        {
+          "url": "https://github.com/xeipuuv/gojsonreference",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module",
+      "type": "library",
+      "name": "github.com/xeipuuv/gojsonschema",
+      "version": "v1.2.0",
+      "scope": "required",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module\u0026goos=darwin\u0026goarch=arm64",
+      "externalReferences": [
+        {
+          "url": "https://github.com/xeipuuv/gojsonschema",
+          "type": "vcs"
+        }
+      ],
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v1.2.1-0.20251024123216-7578fac172e4?type=module",
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module",
+        "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module",
+        "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module"
+      ]
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module",
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module",
+        "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module"
+      ]
+    }
+  ]
+}
