@@ -3,8 +3,7 @@ name: SBOM Generation, Signing, & Vulnerability Scanning
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
 
 jobs:
   generate_sbom:
