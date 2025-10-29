@@ -39,8 +39,9 @@ jobs:
         run: |
           echo "### 🚀 Release Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GoReleaser successfully published binaries and SBOM" >> $GITHUB_STEP_SUMMARY
-  sbom:
-    name: 🔏 Generate & Sign SBOM
+
+  generate_sbom:
+    name: 🔏 Generate SBOM
     runs-on: ubuntu-latest
     needs: goreleaser
 
@@ -73,13 +74,9 @@ jobs:
       - name: Upload SBOM Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: signed-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-
-      - name: Upload Signed SBOM to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          name: unsigned-sbom
+          path: sbom-validator.${{ github.ref_name }}.cdx.json
+          retention-days: 7
 
       - name: Add Job Summary
         run: |
@@ -87,10 +84,45 @@ jobs:
           echo "- ✅ CycloneDX SBOM created" >> $GITHUB_STEP_SUMMARY
           echo "- 🔐 Signed with SecureSBOM API" >> $GITHUB_STEP_SUMMARY
           echo "- 📦 Uploaded as release asset" >> $GITHUB_STEP_SUMMARY
+  
+  sign-sbom:
+    name: Sign SBOM via SecureSBOM
+    needs: generate_sbom
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Download Signed SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-sbom
+          path: .
     
+      - name: Sign SBOM via SecureSBOM
+        uses: shiftleftcyber/secure-sbom-action@v1.3.1
+        with:
+          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
+          secure_sbom_action: sign
+          api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+          key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+
+      - name: Upload Signed SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-sbom
+          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          retention-days: 7
+
+      - name: Upload Signed SBOM to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+
   osv-scan:
-    name: 🔎 OSV Scan (Signed SBOM)
-    needs: sbom
+    name: 🔎 OSV Scan
+    needs: generate_sbom
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -104,13 +136,13 @@ jobs:
       - name: Download Signed SBOM
         uses: actions/download-artifact@v4
         with:
-          name: signed-sbom
+          name: unsigned-sbom
           path: .
 
       - name: Run OSV Scanner
         run: |
-          docker run --rm -v ${{ github.workspace }}:/scan ghcr.io/google/osv-scanner:latest \
-            scan /scan/sbom-validator.${{ github.ref_name }}.cdx.signed.json \
+          docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
+            scan --lockfile sbom-validator.${{ github.ref_name }}.cdx.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
@@ -118,18 +150,32 @@ jobs:
         with:
           name: osv-scan-report
           path: osv-scan-report.json
-  
- # osv-scan:
- #   name: 🔎 OSV Scan (Signed SBOM)
- #   needs: sbom
- #   uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.3"
- #   with:
- #     download-artifact: signed-sbom
- #     scan-args: |-
- #           --format json
- #           --output osv-scan-report.json
- #           sbom-validator.${{ github.ref_name }}.cdx.signed.json
- #   permissions:
- #     security-events: write
- #     contents: read
- #     actions: read
+    
+      - name: Enforce Security Gate
+        id: enforce-gate
+        run: |
+          echo "🔍 Evaluating OSV scan results..."
+          COUNT=$(jq '[.results[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' osv-scan-report.json)
+          if [ "$COUNT" -gt 0 ]; then
+            echo "❌ Blocking release - $COUNT high/critical vulnerabilities detected!"
+            jq '.results[] | select(.severity == "HIGH" or .severity == "CRITICAL") | {package: .package.name, severity: .severity, summary: .summary}' osv-scan-report.json
+            echo "blocked=true" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ No blocking vulnerabilities found."
+            echo "blocked=false" >> $GITHUB_OUTPUT
+          fi
+    
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "### 🔒 OSV Vulnerability Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan file:** \`osv-scan-report.json\`" >> $GITHUB_STEP_SUMMARY
+          if [[ '${{ steps.enforce-gate.outputs.blocked }}' == 'true' ]]; then
+            echo "- ❌ **High/Critical vulnerabilities found — release blocked**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ **No blocking vulnerabilities detected — safe to proceed**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For full report, download the [osv-scan-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+    
