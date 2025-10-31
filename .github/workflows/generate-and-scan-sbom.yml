@@ -154,10 +154,11 @@ jobs:
         env:
           INTERLYNK_SECURITY_TOKEN: ${{ secrets.INTERLYNK_TOKEN }}
         run: |
+          ls -la
           cd pylynk
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
-          python3 pylynk.py upload --prod 'sbom-validator-main' --sbom ../sbom-validator.${SAFE_REF}.cdx.signed.json
+          python3 pylynk.py upload --prod 'sbom-validator-main' --sbom ../sbom-validator.${SAFE_REF}.cdx.json
     
       - name: Add Job Summary
         if: always()
@@ -165,4 +166,4 @@ jobs:
           echo "### 📤 SBOM Upload to Interlynk" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SBOM uploaded successfully to Interlynk" >> $GITHUB_STEP_SUMMARY
           echo "- 🔗 Project: \`sbom-validator-main\`" >> $GITHUB_STEP_SUMMARY
-          echo "- File: \`sbom-validator.${{ needs.generate_sbom.outputs.sanitized_ref }}.cdx.signed.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "- File: \`sbom-validator.${{ needs.generate_sbom.outputs.sanitized_ref }}.cdx.json\`" >> $GITHUB_STEP_SUMMARY
