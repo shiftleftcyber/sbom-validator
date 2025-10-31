@@ -1,0 +1,185 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module",
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/xeipuuv/gojsonpointer"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "27d106a5c66d3f413fadaa2b08cc6514649306bb1295a0c67f78d4feabc01367"
+        }
+      ],
+      "name": "github.com/xeipuuv/gojsonpointer",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module\u0026goos=linux\u0026goarch=amd64",
+      "scope": "required",
+      "type": "library",
+      "version": "v0.0.0-20180127040702-4e3ac2762d5f"
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module",
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/xeipuuv/gojsonreference"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "133256807a2fa27b7b36c723a40c57b0303c4bc04c62f7bc639fbb72e444ed1d"
+        }
+      ],
+      "name": "github.com/xeipuuv/gojsonreference",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module\u0026goos=linux\u0026goarch=amd64",
+      "scope": "required",
+      "type": "library",
+      "version": "v0.0.0-20180127040603-bd5ef7bd5415"
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module",
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "Apache-2.0"
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/xeipuuv/gojsonschema"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2e160946cf8be1f06d8d951fb92648286795bb4411cbc7b95e2ec3d7b53167be"
+        }
+      ],
+      "name": "github.com/xeipuuv/gojsonschema",
+      "purl": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module\u0026goos=linux\u0026goarch=amd64",
+      "scope": "required",
+      "type": "library",
+      "version": "v1.2.0"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module"
+      ],
+      "ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v0.0.0-20251031114132-561057ddd11f?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module"
+    },
+    {
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module"
+    },
+    {
+      "dependsOn": [
+        "pkg:golang/github.com/xeipuuv/gojsonpointer@v0.0.0-20180127040702-4e3ac2762d5f?type=module",
+        "pkg:golang/github.com/xeipuuv/gojsonreference@v0.0.0-20180127040603-bd5ef7bd5415?type=module"
+      ],
+      "ref": "pkg:golang/github.com/xeipuuv/gojsonschema@v1.2.0?type=module"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v0.0.0-20251031114132-561057ddd11f?type=module",
+      "evidence": {
+        "licenses": [
+          {
+            "license": {
+              "id": "MIT"
+            }
+          }
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/shiftleftcyber/sbom-validator"
+        }
+      ],
+      "name": "github.com/shiftleftcyber/sbom-validator",
+      "purl": "pkg:golang/github.com/shiftleftcyber/sbom-validator@v0.0.0-20251031114132-561057ddd11f?type=module\u0026goos=linux\u0026goarch=amd64",
+      "type": "application",
+      "version": "v0.0.0-20251031114132-561057ddd11f"
+    },
+    "timestamp": "2025-10-31T11:42:12Z",
+    "tools": [
+      {
+        "externalReferences": [
+          {
+            "type": "vcs",
+            "url": "https://github.com/CycloneDX/cyclonedx-gomod"
+          },
+          {
+            "type": "website",
+            "url": "https://cyclonedx.org"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "MD5",
+            "content": "c3d43dcbd0fe759f08bf015a813a9b8a"
+          },
+          {
+            "alg": "SHA-1",
+            "content": "535e04b2bbf30291996459f00500006093d693c9"
+          },
+          {
+            "alg": "SHA-256",
+            "content": "64440820e5d881ec20bc7b9937fdc9bd67d15ba4637b2e7959a8f31dd12c5b21"
+          },
+          {
+            "alg": "SHA-384",
+            "content": "4471110c85093e7c488e4c8581800e333bd5ae4ab1b236b8c07423a919b1b1f118a6183ab7c98d7787d7bf6eb2fc01db"
+          },
+          {
+            "alg": "SHA-512",
+            "content": "1761f6f63ed47db7e67754cee46db306f25c894862ac09de99d97e47eba604906f4d38838b50ddbcbd3f15573f772951c9b9c6eba79794feedacafd5c17e38e5"
+          }
+        ],
+        "name": "cyclonedx-gomod",
+        "vendor": "CycloneDX",
+        "version": "v1.9.0"
+      }
+    ]
+  },
+  "serialNumber": "urn:uuid:f9c0faf9-493a-4d3a-9618-85fbb480c0a7",
+  "signature": {
+    "algorithm": "ES256",
+    "value": "MEUCIQDpJ58ECcf+pzU9CkDA8jv5Gxz76WI9/502XuL82rZvvAIgdcVpdPSfZQm96YC2QVNfYbJN5GO9kb+YyYvOk/sJoa8="
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

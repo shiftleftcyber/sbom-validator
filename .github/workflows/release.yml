@@ -141,8 +141,9 @@ jobs:
 
       - name: Run OSV Scanner
         run: |
+          cp sbom-validator.${{ github.ref_name }}.cdx.signed.json bom.json
           docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
-            scan --lockfile sbom-validator.${{ github.ref_name }}.cdx.json \
+            scan --lockfile bom.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report

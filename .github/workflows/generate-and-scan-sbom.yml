@@ -86,8 +86,11 @@ jobs:
         run: |
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
+          # osv-scanner does not like when an sbom is named with "signed" - change filename into something
+          # it can understand
+          cp sbom-validator.${SAFE_REF}.cdx.signed.json bom.json
           docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
-            scan --lockfile sbom-validator.${SAFE_REF}.cdx.json \
+            scan --lockfile bom.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
