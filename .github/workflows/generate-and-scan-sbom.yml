@@ -123,3 +123,46 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "For full report, download the [osv-scan-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+
+  upload-sbom:
+    name: Upload SBOM to Interlynk
+    needs: generate_sbom
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download Signed SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: .
+    
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+     
+      - name: Clone Interlynk pylynk
+        run: git clone https://github.com/interlynk-io/pylynk.git
+    
+      - name: Install pylynk dependencies
+        run: |
+          cd pylynk
+          pip install -r requirements.txt
+          
+      - name: Upload SBOM to Interlynk
+        env:
+          INTERLYNK_SECURITY_TOKEN: ${{ secrets.INTERLYNK_TOKEN }}
+        run: |
+          cd pylynk
+          SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
+          SAFE_REF="${SAFE_REF//\//-}"
+          python3 pylynk.py upload --prod 'sbom-validator-main' --sbom ../sbom-validator.${SAFE_REF}.cdx.signed.json
+    
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "### 📤 SBOM Upload to Interlynk" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SBOM uploaded successfully to Interlynk" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔗 Project: \`sbom-validator-main\`" >> $GITHUB_STEP_SUMMARY
+          echo "- File: \`sbom-validator.${{ needs.generate_sbom.outputs.sanitized_ref }}.cdx.signed.json\`" >> $GITHUB_STEP_SUMMARY
