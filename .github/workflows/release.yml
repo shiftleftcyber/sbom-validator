@@ -11,9 +11,10 @@ permissions:
   contents: write
 
 jobs:
-  goreleaser:
-    name: 🚀 Release
+  releasse:
+    name: 🚀 Perform GitHub Release
     runs-on: ubuntu-latest
+    needs: [sign-sbom, osv-scan]
 
     steps:
       - name: Checkout Repository
@@ -43,7 +44,6 @@ jobs:
   generate_sbom:
     name: 🔏 Generate SBOM
     runs-on: ubuntu-latest
-    needs: goreleaser
 
     steps:
       - name: Checkout Repository
@@ -62,14 +62,6 @@ jobs:
           args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Sign SBOM
-        uses: shiftleftcyber/secure-sbom-action@v1.3.1
-        with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
-          secure_sbom_action: sign
-          api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-          key_id: ${{ secrets.SECURE_SBOM_KEYID }}
 
       - name: Upload SBOM Artifacts
         uses: actions/upload-artifact@v4
@@ -107,6 +99,14 @@ jobs:
           secure_sbom_action: sign
           api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+      
+      - name: Verify SBOM via SecureSBOM
+        uses: shiftleftcyber/secure-sbom-action@v1.3.1
+        with:
+            sbom_file: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+            secure_sbom_action: verify
+            api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+            key_id: ${{ secrets.SECURE_SBOM_KEYID }}
 
       - name: Upload Signed SBOM
         uses: actions/upload-artifact@v4
@@ -141,8 +141,9 @@ jobs:
 
       - name: Run OSV Scanner
         run: |
+          cp sbom-validator.${{ github.ref_name }}.cdx.signed.json bom.json
           docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
-            scan --lockfile sbom-validator.${{ github.ref_name }}.cdx.json \
+            scan --lockfile bom.json \
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
