@@ -157,7 +157,6 @@ jobs:
         env:
           INTERLYNK_SECURITY_TOKEN: ${{ secrets.INTERLYNK_TOKEN }}
         run: |
-          ls -la
           cd pylynk
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
