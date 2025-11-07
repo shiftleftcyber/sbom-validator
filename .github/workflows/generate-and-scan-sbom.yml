@@ -161,7 +161,7 @@ jobs:
           cd pylynk
           SAFE_REF="${{ needs.generate_sbom.outputs.sanitized_ref || github.ref_name }}"
           SAFE_REF="${SAFE_REF//\//-}"
-          python3 pylynk.py upload --prod 'sbom-validator-main' --sbom ../sbom-validator.${SAFE_REF}.cdx.json
+          python3 pylynk.py upload --prod 'sbom-validator-main' --sbom ../sbom-validator.${SAFE_REF}.cdx.signed.json
     
       - name: Add Job Summary
         if: always()
