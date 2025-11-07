@@ -136,7 +136,7 @@ jobs:
       - name: Download Signed SBOM
         uses: actions/download-artifact@v4
         with:
-          name: unsigned-sbom
+          name: signed-sbom
           path: .
 
       - name: Run OSV Scanner
