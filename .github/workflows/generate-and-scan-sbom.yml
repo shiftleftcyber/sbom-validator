@@ -117,7 +117,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: signed-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          path: sbom-validator.${{ needs.setup.outputs.sanitized_branch_name }}.cdx.signed.json
           retention-days: 7
 
   osv-scan:
