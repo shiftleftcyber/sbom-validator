@@ -186,7 +186,7 @@ jobs:
 
   upload-sbom:
     name: Upload SBOM to Interlynk
-    needs: [setup, generate_sbom]
+    needs: [setup, sign-sbom]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
