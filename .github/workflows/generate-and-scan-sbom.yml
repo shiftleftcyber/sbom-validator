@@ -252,6 +252,7 @@ jobs:
         with:
           rearm_api_id: ${{ secrets.REARM_API_ID }}
           rearm_api_key: ${{ secrets.REARM_API_KEY }}
+          rearm_component_id: edfefc1a-0627-4782-95ad-51eee518ea78
 
       - name: Gen SBOM, Sign & Add Release
         uses: relizaio/rearm-add-release@1.5.1
