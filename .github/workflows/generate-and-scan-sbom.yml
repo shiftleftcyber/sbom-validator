@@ -230,3 +230,44 @@ jobs:
           echo "- ✅ SBOM uploaded successfully to Interlynk" >> $GITHUB_STEP_SUMMARY
           echo "- 🔗 Project: \`sbom-validator-main\`" >> $GITHUB_STEP_SUMMARY
           echo "- File: \`sbom-validator.${{ needs.setup.outputs.sanitized_branch_name }}.cdx.json\`" >> $GITHUB_STEP_SUMMARY
+    
+  sign-with-rearm:
+    name: Sign SBOM with SecureSBOM via ReARM CLI
+    needs: [setup, sign-sbom]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Download Unsigned SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-sbom
+          path: .
+    
+      - name: Setup ReARM CLI
+        uses: relizaio/setup-rearm-cli-action@1.2.1
+
+      - uses: relizaio/rearm-get-version@1.1.0
+        with:
+          rearm_api_id: ${{ secrets.REARM_API_ID }}
+          rearm_api_key: ${{ secrets.REARM_API_KEY }}
+
+      - name: Gen SBOM, Sign & Add Release
+        uses: relizaio/rearm-add-release@1.5.1
+        with:
+          rearm_api_id: ${{ secrets.REARM_API_ID }}
+          rearm_api_key: ${{ secrets.REARM_API_KEY }}
+          rearm_component_id: edfefc1a-0627-4782-95ad-51eee518ea78
+          image_full_name: sbom-validator.${{ needs.setup.outputs.sanitized_branch_name }}.cdx.json
+          image_digest: 
+          deliverable_type: file
+          enable_sbom: true
+          enable_securesbom: true
+          securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+          securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+          rearm_build_start:
+          rearm_short_version:
+          rearm_full_version:
+          rearm_build_status:
+
