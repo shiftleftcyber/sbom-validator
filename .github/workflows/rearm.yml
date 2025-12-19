@@ -7,7 +7,7 @@ on:
 
 jobs:
   sign-with-rearm:
-    name: Generate, Sign via ReARM & Send to ReARM
+    name: ReARM - Generate, Sign & Send
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
