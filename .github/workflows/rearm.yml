@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
   setup:
@@ -109,3 +111,9 @@ jobs:
           scearts: ${{ steps.sbom.outputs.scearts }}
           rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
           rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
+          
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "### 📤 SBOM Upload to ReARM" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SBOM uploaded successfully to ReARM" >> $GITHUB_STEP_SUMMARY
