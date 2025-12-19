@@ -29,23 +29,20 @@ jobs:
         with: 
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: https://demo.rearmhq.com
-          component: edfefc1a-0627-4782-95ad-51eee518ea78
-          #version: 0.0.2
+          rearm_api_url: ${{ vars.REARM_API_URL }}
+          component: ${{ vars.REARM_COMPONENT_ID }}
 
       - name: Generate and sign SBOMs
         id: sbom
         uses: relizaio/rearm-actions/sbom-sign-scan@main
         with:
-          #image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
-          #image_digest: $DOCKER_SHA_256
           rearm_short_version: ${{ steps.init.outputs.short_version }}
           rearm_full_version: ${{ steps.init.outputs.full_version }}
           enable_sbom: true
           deliverable_type: FILE
           source_code_sbom_type: other
           enable_securesbom: true
-          securesbom_host: https://secure-sbom-api-prod-gateway-dhncnyq8.uc.gateway.dev
+          securesbom_host: ${{ vars.SECURE_SBOM_API_URL }}
           securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
           securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
 
@@ -54,10 +51,8 @@ jobs:
         with:
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: https://demo.rearmhq.com
-          component: edfefc1a-0627-4782-95ad-51eee518ea78
-          #image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
-          #image_digest: $DOCKER_SHA_256
+          rearm_api_url: ${{ vars.REARM_API_URL }}
+          component: ${{ vars.REARM_COMPONENT_ID }}
           rearm_build_start: ${{ steps.init.outputs.build_start }}
           rearm_short_version: ${{ steps.init.outputs.short_version }}
           rearm_full_version: ${{ steps.init.outputs.full_version }}
