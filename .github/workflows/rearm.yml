@@ -4,10 +4,56 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
+  setup:
+    name: Determine Project Version
+    runs-on: ubuntu-latest
+    outputs:
+      sanitized_project_version: ${{ steps.setversion.outputs.sanitized_project_version }}
+    
+    steps:
+        - name: Checkout (with tags)
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+        
+        - name: Set Project Version
+          id: setversion
+          shell: bash
+          run: |
+            echo "GITHUB_REF=${GITHUB_REF}"
+            echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
+
+            LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+
+            if [[ -z "$LATEST_TAG" ]]; then
+              echo "No version tags found (vX.Y.Z required)"
+              exit 1
+            fi
+
+            BASE_VERSION="${LATEST_TAG#v}"
+
+            if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+              VERSION="${GITHUB_REF_NAME#v}"
+            elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+              VERSION="${BASE_VERSION}-main-${GITHUB_RUN_NUMBER}"
+            else
+              VERSION="${BASE_VERSION}-dev-${GITHUB_RUN_NUMBER}"
+            fi
+
+            echo "Resolved project version: ${VERSION}"
+            echo "sanitized_project_version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+            echo "Final output:"
+            cat "$GITHUB_OUTPUT"
+
   sign-with-rearm:
     name: ReARM - Generate, Sign & Send
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -29,36 +75,45 @@ jobs:
         with: 
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ env.REARM_API_URL }}
-          component: ${{ env.REARM_COMPONENT_ID }}
-          version: 0.0.2
+          rearm_api_url: ${{ vars.REARM_API_URL }}
+          component: ${{ vars.REARM_COMPONENT_ID }}
+          version: ${{ needs.setup.outputs.sanitized_project_version }}
 
       - name: Generate and sign SBOMs
         id: sbom
         uses: relizaio/rearm-actions/sbom-sign-scan@main
         with:
-          image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
-          image_digest: $DOCKER_SHA_256
-          rearm_short_version: 0.0.2
-          rearm_full_version: 0.0.2
           enable_sbom: true
           deliverable_type: FILE
           source_code_sbom_type: other
           enable_securesbom: true
+          securesbom_host: ${{ vars.SECURE_SBOM_API_URL }}
           securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
           securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+          rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
+          rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
 
       - name: Submit metadata to ReARM and Finalize
         uses: relizaio/rearm-actions/finalize@main
         with:
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ env.REARM_API_URL }}
-          component: ${{ env.REARM_COMPONENT_ID }}
-          image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
-          image_digest: $DOCKER_SHA_256
+          rearm_api_url: ${{ vars.REARM_API_URL }}
+          component: ${{ vars.REARM_COMPONENT_ID }}
           rearm_build_start: ${{ steps.init.outputs.build_start }}
-          rearm_short_version: 0.0.2
-          rearm_full_version: 0.0.2
-          rearm_build_lifecycle: DRAFT
-          deliverable_type: FILE
+          rearm_build_lifecycle: 'ASSEMBLED'
+          deliverable_type: 'FILE'
+          commit_list: ${{ steps.init.outputs.commit_list }}
+          sce_commit: ${{ steps.init.outputs.sce_commit }}
+          sce_commit_message: ${{ steps.init.outputs.sce_commit_message }}
+          sce_commit_date: ${{ steps.init.outputs.sce_commit_date }}
+          sce_vcs_uri: ${{ steps.init.outputs.sce_vcs_uri }}
+          scearts: ${{ steps.sbom.outputs.scearts }}
+          rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
+          rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
+          
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "### 📤 SBOM Upload to ReARM" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SBOM uploaded successfully to ReARM" >> $GITHUB_STEP_SUMMARY
