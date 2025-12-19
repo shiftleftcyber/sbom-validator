@@ -1,0 +1,64 @@
+name: SBOM Generation, Signing, & Vulnerability Scanning
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  sign-with-rearm:
+    name: Sign SBOM with SecureSBOM via ReARM CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: setup-rearm
+        name: setup-rearm
+        uses: relizaio/rearm-actions/setup-cli@main
+        
+      - name: Display rearm version
+        shell: bash
+        run: rearm version
+        
+      - id: init
+        name: Initialize ReARM Flow
+        uses: relizaio/rearm-actions/initialize@main
+        with: 
+          rearm_api_id: ${{ secrets.REARM_API_ID }}
+          rearm_api_key: ${{ secrets.REARM_API_KEY }}
+          rearm_api_url: https://demo.rearmhq.com
+          component: edfefc1a-0627-4782-95ad-51eee518ea78
+          version: 0.0.2
+
+      - name: Generate and sign SBOMs
+        id: sbom
+        uses: relizaio/rearm-actions/sbom-sign-scan@main
+        with:
+          image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
+          image_digest: $DOCKER_SHA_256
+          rearm_short_version: 0.0.2
+          rearm_full_version: 0.0.2
+          enable_sbom: true
+          deliverable_type: FILE
+          source_code_sbom_type: other
+          enable_securesbom: true
+          securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+          securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+
+      - name: Submit metadata to ReARM and Finalize
+        uses: relizaio/rearm-actions/finalize@main
+        with:
+          rearm_api_id: ${{ secrets.REARM_API_ID }}
+          rearm_api_key: ${{ secrets.REARM_API_KEY }}
+          rearm_api_url: https://demo.rearmhq.com
+          image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
+          image_digest: $DOCKER_SHA_256
+          rearm_build_start: ${{ steps.init.outputs.build_start }}
+          rearm_short_version: 0.0.2
+          rearm_full_version: 0.0.2
+          rearm_build_lifecycle: DRAFT
+          deliverable_type: FILE
+          component: edfefc1a-0627-4782-95ad-51eee518ea78
