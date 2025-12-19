@@ -45,6 +45,7 @@ jobs:
           deliverable_type: FILE
           source_code_sbom_type: other
           enable_securesbom: true
+          securesbom_host: https://secure-sbom-api-prod-gateway-dhncnyq8.uc.gateway.dev
           securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
           securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
 
