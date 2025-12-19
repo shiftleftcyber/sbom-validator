@@ -61,5 +61,11 @@ jobs:
           rearm_build_start: ${{ steps.init.outputs.build_start }}
           rearm_short_version: ${{ steps.init.outputs.short_version }}
           rearm_full_version: ${{ steps.init.outputs.full_version }}
-          rearm_build_lifecycle: DRAFT
-          deliverable_type: FILE
+          rearm_build_lifecycle: 'DRAFT'
+          deliverable_type: 'FILE'
+          commit_list: ${{ steps.init.outputs.commit_list }}
+          sce_commit: ${{ steps.init.outputs.sce_commit }}
+          sce_commit_message: ${{ steps.init.outputs.sce_commit_message }}
+          sce_commit_date: ${{ steps.init.outputs.sce_commit_date }}
+          sce_vcs_uri: ${{ steps.init.outputs.sce_vcs_uri }}
+          scearts: ${{ steps.sbom.outputs.scearts }}
