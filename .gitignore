@@ -4,3 +4,4 @@ coverage/
 coverage.out
 vendor/
 .DS_Store
+rearm_cli.txt
