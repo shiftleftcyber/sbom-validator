@@ -257,6 +257,7 @@ jobs:
           rearm_api_key: ${{ secrets.REARM_API_KEY }}
           rearm_api_url: https://demo.rearmhq.com
           component: edfefc1a-0627-4782-95ad-51eee518ea78
+          version: 0.0.2
     
       - name: Generate and sign SBOMs
         id: sbom
