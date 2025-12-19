@@ -29,8 +29,8 @@ jobs:
         with: 
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ env.REARM_API_URL }}
-          component: ${{ env.REARM_COMPONENT_ID }}
+          rearm_api_url: https://demo.rearmhq.com
+          component: edfefc1a-0627-4782-95ad-51eee518ea78
           version: 0.0.2
 
       - name: Generate and sign SBOMs
@@ -53,8 +53,8 @@ jobs:
         with:
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ env.REARM_API_URL }}
-          component: ${{ env.REARM_COMPONENT_ID }}
+          rearm_api_url: https://demo.rearmhq.com
+          component: edfefc1a-0627-4782-95ad-51eee518ea78
           image_full_name: ${{inputs.image_namespace}}/${{inputs.image_name}}
           image_digest: $DOCKER_SHA_256
           rearm_build_start: ${{ steps.init.outputs.build_start }}
