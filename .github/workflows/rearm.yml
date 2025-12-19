@@ -81,8 +81,6 @@ jobs:
         id: sbom
         uses: relizaio/rearm-actions/sbom-sign-scan@main
         with:
-          #rearm_short_version: ${{ steps.init.outputs.short_version }}
-          #rearm_full_version: ${{ steps.init.outputs.full_version }}
           enable_sbom: true
           deliverable_type: FILE
           source_code_sbom_type: other
@@ -101,9 +99,7 @@ jobs:
           rearm_api_url: ${{ vars.REARM_API_URL }}
           component: ${{ vars.REARM_COMPONENT_ID }}
           rearm_build_start: ${{ steps.init.outputs.build_start }}
-          #rearm_short_version: ${{ steps.init.outputs.short_version }}
-          #rearm_full_version: ${{ steps.init.outputs.full_version }}
-          rearm_build_lifecycle: 'DRAFT'
+          rearm_build_lifecycle: 'ASSEMBLED'
           deliverable_type: 'FILE'
           commit_list: ${{ steps.init.outputs.commit_list }}
           sce_commit: ${{ steps.init.outputs.sce_commit }}
