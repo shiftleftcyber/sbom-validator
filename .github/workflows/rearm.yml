@@ -92,6 +92,11 @@ jobs:
           securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
           rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
+    
+      - name: TEMP - add REARM_BUILD_LIFECYCLE
+        shell: bash
+        run: |
+          echo "REARM_BUILD_LIFECYCLE=ASSEMBLED" >> $GITHUB_ENV
 
       - name: Submit metadata to ReARM and Finalize
         uses: relizaio/rearm-actions/finalize@main
