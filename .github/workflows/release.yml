@@ -211,7 +211,7 @@ jobs:
           INTERLYNK_SECURITY_TOKEN: ${{ secrets.INTERLYNK_TOKEN }}
         run: |
           cd pylynk
-          python3 pylynk.py upload --prod 'sbom-validator-release' --sbom ../sbom-validator.${{ github.ref_name }}.cdx.signed.json
+          python3 pylynk.py upload --prod 'sbom-validator' --env "Production" --sbom ../sbom-validator.${{ github.ref_name }}.cdx.signed.json
     
       - name: Add Job Summary
         if: always()
