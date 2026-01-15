@@ -1,0 +1,10 @@
+FROM golang:1.24-alpine3.22@sha256:72571244e36da5102647587fab1f27e94fd6c8668a9933d16281aa9e68d05173
+ARG VERSION=not_versioned
+ARG CYCLONEDX_GOLANG_VERSION=v1.9.0
+RUN mkdir /app && mkdir /sbom
+COPY . /app/
+WORKDIR /app
+RUN go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@${CYCLONEDX_GOLANG_VERSION} \
+    && cyclonedx-gomod version \
+    && cyclonedx-gomod mod -type library -json -output bom.json . \
+    && cp /app/bom.json /sbom/sbom.json
