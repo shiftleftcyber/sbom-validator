@@ -85,7 +85,7 @@ jobs:
         with:
           enable_sbom: true
           deliverable_type: FILE
-          source_code_sbom_type: other
+          source_code_sbom_type: custom
           enable_securesbom: true
           securesbom_host: ${{ vars.SECURE_SBOM_API_URL }}
           securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
