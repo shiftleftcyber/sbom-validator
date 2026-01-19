@@ -78,6 +78,7 @@ jobs:
           rearm_api_url: ${{ vars.REARM_API_URL }}
           component: ${{ vars.REARM_COMPONENT_ID }}
           version: ${{ needs.setup.outputs.sanitized_project_version }}
+          allow_rebuild: true          
 
       - name: Generate and sign SBOMs
         id: sbom
