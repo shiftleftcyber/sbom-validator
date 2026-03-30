@@ -18,18 +18,18 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version: "1.21"
           check-latest: true
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
         with:
           version: latest
           args: release --clean
@@ -46,17 +46,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version: "1.21"
           check-latest: true
 
       - name: Generate SBOM (CycloneDX)
-        uses: CycloneDX/gh-gomod-generate-sbom@v2
+        uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
         with:
           version: v1
           args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
@@ -64,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: unsigned-sbom
           path: sbom-validator.${{ github.ref_name }}.cdx.json
@@ -83,40 +82,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
       - name: Download Signed SBOM
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: unsigned-sbom
           path: .
     
       - name: Sign SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@v1.3.1
+        uses: shiftleftcyber/secure-sbom-action@d2536226566f5149379e62e7c2f7670ca1f9a756 # v2.2.1
         with:
           sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
-          secure_sbom_action: sign
-          api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-          key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+          secure_sbom_action: sign_sbom
+          secure_sbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+          secure_sbom_signing_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
       
       - name: Verify SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@v1.3.1
+        uses: shiftleftcyber/secure-sbom-action@d2536226566f5149379e62e7c2f7670ca1f9a756 # v2.2.1
         with:
             sbom_file: sbom-validator.${{ github.ref_name }}.cdx.signed.json
             secure_sbom_action: verify
-            api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-            key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+            secure_sbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
+            secure_sbom_signing_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
 
       - name: Upload Signed SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: signed-sbom
           path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
           retention-days: 7
 
       - name: Upload Signed SBOM to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           files: sbom-validator.${{ github.ref_name }}.cdx.signed.json
 
@@ -130,11 +126,8 @@ jobs:
       actions: read
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
       - name: Download Signed SBOM
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: signed-sbom
           path: .
@@ -147,7 +140,7 @@ jobs:
             --format json --output osv-scan-report.json || true
 
       - name: Upload OSV Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: osv-scan-report
           path: osv-scan-report.json
@@ -185,25 +178,26 @@ jobs:
     needs: sign-sbom
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
       - name: Download Signed SBOM
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: signed-sbom
           path: .
     
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.11'
      
       - name: Clone Interlynk pylynk
-        run: git clone https://github.com/interlynk-io/pylynk.git
+        run: git clone --depth=1 https://github.com/interlynk-io/pylynk.git
     
       - name: Install pylynk dependencies
+        env:
+            INTERLYNK_COMMIT_HASH: '4db3f363aa08a2bd922c98456088705662afff30' #v1.2.3
         run: |
           cd pylynk
+          git checkout ${{ env.INTERLYNK_COMMIT_HASH }}
           pip install -r requirements.txt
           
       - name: Upload SBOM to Interlynk

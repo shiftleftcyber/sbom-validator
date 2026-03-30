@@ -16,7 +16,7 @@ jobs:
     
     steps:
         - name: Checkout (with tags)
-          uses: actions/checkout@v4
+          uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
           with:
             fetch-depth: 0
             fetch-tags: true
@@ -57,13 +57,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - id: setup-rearm
         name: setup-rearm
-        uses: relizaio/rearm-actions/setup-cli@main
+        uses: relizaio/rearm-actions/setup-cli@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
         
       - name: Display rearm version
         shell: bash
@@ -71,7 +71,7 @@ jobs:
         
       - id: init
         name: Initialize ReARM Flow
-        uses: relizaio/rearm-actions/initialize@main
+        uses: relizaio/rearm-actions/initialize@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
         with: 
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
@@ -82,14 +82,14 @@ jobs:
 
       - name: Generate and sign SBOMs
         id: sbom
-        uses: relizaio/rearm-actions/sbom-sign-scan@main
+        uses: relizaio/rearm-actions/sbom-sign-scan@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
         with:
           enable_sbom: true
           deliverable_type: FILE
           source_code_sbom_type: custom
           enable_securesbom: true
           securesbom_host: ${{ vars.SECURE_SBOM_API_URL }}
-          securesbom_pub_key_id: ${{ secrets.SECURE_SBOM_KEYID }}
+          securesbom_pub_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
           securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
           rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
           rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
@@ -100,7 +100,7 @@ jobs:
           echo "REARM_BUILD_LIFECYCLE=ASSEMBLED" >> $GITHUB_ENV
 
       - name: Submit metadata to ReARM and Finalize
-        uses: relizaio/rearm-actions/finalize@main
+        uses: relizaio/rearm-actions/finalize@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
         with:
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
