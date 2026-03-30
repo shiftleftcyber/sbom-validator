@@ -95,7 +95,7 @@ jobs:
           path: .
     
       - name: Sign SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@d2536226566f5149379e62e7c2f7670ca1f9a756 # v2.2.1
+        uses: shiftleftcyber/secure-sbom-action@542dffaadd81bc0614947d749720558a399e6454 # v2.4.0
         with:
           sbom_file: sbom-validator.${{ needs.setup.outputs.sanitized_branch_name }}.cdx.json
           secure_sbom_action: sign_sbom
@@ -103,7 +103,7 @@ jobs:
           secure_sbom_signing_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
       
       - name: Verify SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@d2536226566f5149379e62e7c2f7670ca1f9a756 # v2.2.1
+        uses: shiftleftcyber/secure-sbom-action@542dffaadd81bc0614947d749720558a399e6454 # v2.4.0
         with:
             sbom_file: sbom-validator.${{ needs.setup.outputs.sanitized_branch_name }}.cdx.signed.json
             secure_sbom_action: verify_sbom
