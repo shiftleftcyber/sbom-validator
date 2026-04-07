@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/shiftleftcyber/sbom-validator"
+	sbomvalidator "github.com/shiftleftcyber/sbom-validator/v2"
 )
 
 // main serves as a reference implementation for SBOM validation.
@@ -25,19 +25,22 @@ import (
 //
 // Usage:
 //
-//	go run main.go -file=<path-to-sbom.json>
+//	go run main.go -file=<path-to-sbom.json> [-debug]
 //
 // Example:
 //
-//	go run main.go -file=samples/juice-shop-17.1.1.cdx.json
+//	go run main.go -file=samples/juice-shop-17.1.1.cdx.json -debug
 func main() {
 
 	sbomPath := flag.String("file", "", "Path to the SBOM JSON file")
+	debug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
+
+	sbomvalidator.SetDebugLogging(*debug)
 
 	// Ensure the file path is provided
 	if *sbomPath == "" {
-		log.Fatal("Usage: go run main.go -file=<path-to-sbom.json>")
+		log.Fatal("Usage: go run main.go -file=<path-to-sbom.json> [-debug]")
 	}
 
 	// Read SBOM file
