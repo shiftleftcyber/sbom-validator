@@ -1,0 +1,97 @@
+{
+    "$schema": "https://cyclonedx.org/schema/bom-1.7.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.7",
+    "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+    "version": 1,
+    "metadata": {
+      "timestamp": "2025-01-21T12:00:00Z",
+      "component": {
+        "bom-ref": "internal-web-app",
+        "manufacturer": {
+          "name": "Acme Inc"
+        },
+        "type": "application",
+        "name": "Internal Web App",
+        "version": "2.4.1",
+        "description": "This is an example and serves as the affected first-party application in this example."
+      }
+    },
+    "compositions": [
+      {
+        "aggregate": "complete",
+        "vulnerabilities": [ "internal-web-app" ]
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "id": "INT-2025-002",
+        "ratings": [
+          {
+            "source": {
+              "name": "Security Research Company"
+            },
+            "score": 6.3,
+            "severity": "medium",
+            "method": "CVSSv31",
+            "vector": "AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:H/A:N"
+          },
+          {
+            "source": {
+              "name": "Security Research Company"
+            },
+            "severity": "high",
+            "method": "OWASP",
+            "vector": "SL:6/M:1/O:7/S:6/ED:7/EE:5/A:4/ID:8/LC:6/LI:5/LAV:5/LAC:7/FD:7/RD:5/NC:7/PV:9"
+          }
+        ],
+        "cwes": [ 285 ],
+        "description": "Authentication bypass vulnerability in the Internal Web App due to improper role validation logic.",
+        "detail": "An authentication bypass vulnerability in the Internal Web App allows users with restricted roles to perform administrative actions. The issue stems from improper role validation in the application’s authentication logic, specifically within the 'verifyRole' function. When a crafted HTTP request is sent to endpoints requiring admin privileges, the system incorrectly assigns elevated access to non-admin users. This vulnerability is most impactful in instances where additional access controls are not in place, as it could lead to unauthorized changes to critical system settings, data exposure, and operational disruptions.",
+        "recommendation": "Update the authentication logic to include strict role validation checks. Deploy version 2.4.2, which addresses the issue by correcting the role validation logic in the 'verifyRole' function.",
+        "workaround": "Restrict access to the application by implementing IP allowlisting or disabling administrative endpoints temporarily.",
+        "proofOfConcept": {
+          "reproductionSteps": "1: Log in with a user account that has restricted privileges (e.g., 'viewer' role). 2: Intercept the authentication token using a proxy tool such as Burp Suite. 3: Modify the HTTP request to include the 'admin=true' parameter in the body or query string. 4: Send the modified request to an administrative endpoint, such as '/admin/settings'. 5: Observe that the response allows unauthorized access to administrative functionality.",
+          "environment": "Prod and subprod",
+          "supportingMaterial": [
+            {
+              "contentType": "image/jpeg",
+              "encoding": "base64",
+              "content": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q=="
+            }
+          ]
+        },
+        "created": "2025-01-19T12:00:00Z",
+        "published": "2025-01-19T12:00:00Z",
+        "updated": "2025-01-21T12:00:00Z",
+        "credits": {
+          "organizations": [
+            {
+              "name": "Security Research Company",
+              "url": [ "https://example.com/" ]
+            }
+          ],
+          "individuals": [
+            {
+              "name": "James T. Vidal",
+              "email": "james.t.vidal@example.com"
+            }
+          ]
+        },
+        "analysis": {
+          "state": "exploitable"
+        },
+        "affects": [
+          {
+            "ref": "internal-web-app",
+            "versions": [
+              {
+                "version": "2.4.1",
+                "status": "affected"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }

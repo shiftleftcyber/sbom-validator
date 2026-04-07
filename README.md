@@ -1,8 +1,8 @@
 # ShiftSBOM Validator
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/sbom-validator.svg)](https://pkg.go.dev/github.com/shiftleftcyber/sbom-validator)
+[![Go Reference](https://pkg.go.dev/badge/github.com/shiftleftcyber/sbom-validator/v2.svg)](https://pkg.go.dev/github.com/shiftleftcyber/sbom-validator/v2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/shiftleftcyber/sbom-validator)](https://goreportcard.com/report/github.com/shiftleftcyber/sbom-validator)
+[![Go Report Card](https://goreportcard.com/badge/github.com/shiftleftcyber/sbom-validator/v2)](https://goreportcard.com/report/github.com/shiftleftcyber/sbom-validator/v2)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/shiftleftcyber/sbom-validator)
 
 ## Overview
@@ -27,8 +27,26 @@ SBOM specifications. It ensures compliance with formats like
 Use `go get` to install the package:
 
 ```sh
-go get github.com/shiftleftcyber/sbom-validator
+go get github.com/shiftleftcyber/sbom-validator/v2@latest
 ```
+
+## Upgrading To v2
+
+Existing projects pinned to older `v1` versions of `github.com/shiftleftcyber/sbom-validator`
+will continue to work without changes.
+
+To upgrade to `v2`, update your import path and dependency:
+
+```sh
+go get github.com/shiftleftcyber/sbom-validator/v2@latest
+```
+
+```go
+import sbomvalidator "github.com/shiftleftcyber/sbom-validator/v2"
+```
+
+Projects still importing `github.com/shiftleftcyber/sbom-validator` without the `/v2`
+suffix should remain on the `v1` line until they are ready to migrate.
 
 ## Usage
 
@@ -41,17 +59,20 @@ import (
     "log"
     "os"
 
-    "github.com/shiftleftcyber/sbom-validator"
+    sbomvalidator "github.com/shiftleftcyber/sbom-validator/v2"
 )
 
 func main() {
 
     sbomPath := flag.String("file", "", "Path to the SBOM JSON file")
+    debug := flag.Bool("debug", false, "Enable debug logging")
     flag.Parse()
+
+    sbomvalidator.SetDebugLogging(*debug)
 
     // Ensure the file path is provided
     if *sbomPath == "" {
-        log.Fatal("Usage: go run main.go -file=<path-to-sbom.json>")
+        log.Fatal("Usage: go run main.go -file=<path-to-sbom.json> [-debug]")
     }
 
     // Read SBOM file
@@ -102,8 +123,16 @@ You can build an example app and pass in an SBOM
 make build
 
 ./bin/sbom-validator-example -file sample-sboms/sample-1.6.cdx.json
-CycloneDX SBOM type detected
-CycloneDX version is set to: 1.6
+{
+ "isValid": true,
+ "sbomType": "CycloneDX",
+ "sbomVersion": "1.6",
+ "detectedFormat": "JSON"
+}
+
+./bin/sbom-validator-example -file sample-sboms/sample-1.6.cdx.json -debug
+DEBUG: 2026/04/07 14:00:00 CycloneDX SBOM type detected
+DEBUG: 2026/04/07 14:00:00 CycloneDX version is set to: 1.6
 {
  "isValid": true,
  "sbomType": "CycloneDX",

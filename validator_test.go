@@ -1,6 +1,7 @@
 package sbomvalidator
 
 import (
+	"os"
 	"testing"
 )
 
@@ -258,6 +259,44 @@ func TestValidateSBOM(t *testing.T) {
 
 			if err != nil && tt.name != "Invalid Schema JSON" {
 				t.Errorf("Unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+func TestValidateSBOMDataOfflineCycloneDX(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "CycloneDX 1.6",
+			path: "sample-sboms/sample-1.6.cdx.json",
+		},
+		{
+			name: "CycloneDX 1.6 Signed",
+			path: "sample-sboms/sample-1.6.cdx.signed.json",
+		},
+		{
+			name: "CycloneDX 1.7",
+			path: "sample-sboms/shiftsbom-validator-1.7.cdx.json",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sbomData, err := os.ReadFile(tt.path)
+			if err != nil {
+				t.Fatalf("failed to read %s: %v", tt.path, err)
+			}
+
+			result, err := ValidateSBOMData(sbomData)
+			if err != nil {
+				t.Fatalf("expected offline validation to succeed for %s: %v", tt.path, err)
+			}
+
+			if !result.IsValid {
+				t.Fatalf("expected %s to be valid, got errors: %v", tt.path, result.ValidationErrors)
 			}
 		})
 	}

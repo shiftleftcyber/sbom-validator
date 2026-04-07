@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  releasse:
+  release:
     name: 🚀 Perform GitHub Release
     runs-on: ubuntu-latest
     needs: [osv-scan]
@@ -214,3 +214,43 @@ jobs:
           echo "- ✅ SBOM uploaded successfully to Interlynk" >> $GITHUB_STEP_SUMMARY
           echo "- 🔗 Project: \`sbom-validator-main\`" >> $GITHUB_STEP_SUMMARY
           echo "- File: \`sbom-validator.${{ github.ref_name }}.cdx.json\`" >> $GITHUB_STEP_SUMMARY
+
+  update-major-tag:
+    name: Update Major Tag Alias
+    needs: [release]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Update moving major tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          case "$RELEASE_TAG" in
+            v[0-9]*.[0-9]*.[0-9]*)
+              MAJOR_TAG="$(echo "$RELEASE_TAG" | cut -d. -f1)"
+              ;;
+            *)
+              echo "Tag $RELEASE_TAG is not a semver release tag; skipping major tag update."
+              exit 0
+              ;;
+          esac
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -fa "$MAJOR_TAG" -m "Update $MAJOR_TAG to $RELEASE_TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$MAJOR_TAG" --force
+
+      - name: Add Job Summary
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          MAJOR_TAG="$(echo "$RELEASE_TAG" | cut -d. -f1)"
+          echo "### 🏷️ Major Tag Alias Updated" >> $GITHUB_STEP_SUMMARY
+          echo "- Release tag: \`$RELEASE_TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Moving major tag: \`$MAJOR_TAG\`" >> $GITHUB_STEP_SUMMARY

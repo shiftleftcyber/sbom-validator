@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
@@ -14,6 +15,44 @@ const (
 	SBOM_CYCLONEDX = "CycloneDX"
 	SBOM_SPDX      = "SPDX"
 )
+
+const cyclonedxSchemaBaseURL = "http://cyclonedx.org/schema/"
+
+var offlineFallbackSchemas = map[string]string{
+	cyclonedxSchemaBaseURL + "spdx.schema.json": `{
+		"$id": "http://cyclonedx.org/schema/spdx.schema.json",
+		"type": "string"
+	}`,
+	cyclonedxSchemaBaseURL + "jsf-0.82.schema.json": `{
+		"$id": "http://cyclonedx.org/schema/jsf-0.82.schema.json",
+		"definitions": {
+			"signature": true
+		}
+	}`,
+	cyclonedxSchemaBaseURL + "cryptography-defs.schema.json": `{
+		"$id": "http://cyclonedx.org/schema/cryptography-defs.schema.json",
+		"definitions": {
+			"algorithmFamiliesEnum": {
+				"type": "string"
+			},
+			"ellipticCurvesEnum": {
+				"type": "string"
+			}
+		}
+	}`,
+}
+
+var debugLogger = log.New(io.Discard, "DEBUG: ", log.LstdFlags)
+
+// SetDebugLogging enables or disables package debug logs.
+func SetDebugLogging(enabled bool) {
+	if enabled {
+		debugLogger.SetOutput(log.Writer())
+		return
+	}
+
+	debugLogger.SetOutput(io.Discard)
+}
 
 // ValidationResult represents the outcome of validating a Software Bill of Materials (SBOM).
 //
@@ -157,13 +196,13 @@ func detectSBOMType(jsonData string) (string, error) {
 	// CycloneDX contains a bomFormat field
 	cyclonedxFormat, ok := obj["bomFormat"].(string)
 	if ok {
-		log.Printf("%s SBOM type detected", cyclonedxFormat)
+		debugLogger.Printf("%s SBOM type detected", cyclonedxFormat)
 		return cyclonedxFormat, nil
 	}
 
 	spdxVersion, ok := obj["spdxVersion"].(string)
 	if ok {
-		log.Printf("%s SBOM type detected", spdxVersion)
+		debugLogger.Printf("%s SBOM type detected", spdxVersion)
 		return spdxVersion, nil
 	}
 
@@ -203,15 +242,20 @@ func validateSBOM(schemaSBOM, sbomData string) (bool, []string, error) {
 		return false, nil, fmt.Errorf("invalid JSON format")
 	}
 
-	schemaLoader := gojsonschema.NewStringLoader(schemaSBOM)
+	schemaLoader := gojsonschema.NewSchemaLoader()
 	documentLoader := gojsonschema.NewStringLoader(sbomData)
 
-	_, err := gojsonschema.NewSchema(schemaLoader)
+	err := addOfflineFallbackSchemas(schemaLoader)
+	if err != nil {
+		return false, nil, fmt.Errorf("failed to register offline schema dependencies: %v", err)
+	}
+
+	schema, err := schemaLoader.Compile(gojsonschema.NewStringLoader(schemaSBOM))
 	if err != nil {
 		return false, nil, fmt.Errorf("invalid schema format: %v", err)
 	}
 
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	result, err := schema.Validate(documentLoader)
 	if err != nil {
 		return false, nil, err
 	}
@@ -225,6 +269,16 @@ func validateSBOM(schemaSBOM, sbomData string) (bool, []string, error) {
 	}
 
 	return true, nil, nil
+}
+
+func addOfflineFallbackSchemas(loader *gojsonschema.SchemaLoader) error {
+	for schemaURL, schema := range offlineFallbackSchemas {
+		if err := loader.AddSchema(schemaURL, gojsonschema.NewStringLoader(schema)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // extractSBOMVersion extracts the "version" field from an SBOM JSON string.
@@ -260,7 +314,7 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 			return "", fmt.Errorf(`"specVersion" field missing or not a string`)
 		}
 
-		log.Println("CycloneDX version is set to:", version)
+		debugLogger.Println("CycloneDX version is set to:", version)
 		return version, nil
 		// SPDX SBOMs have the version embedded into the spdxVersion filed
 	} else if strings.Contains(sbomType, SBOM_SPDX) {
@@ -269,7 +323,7 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 			return "", fmt.Errorf(`"spdxVersion" field missing or not a string`)
 		}
 
-		log.Println("SPDX version is set to:", version)
+		debugLogger.Println("SPDX version is set to:", version)
 		return version, nil
 	}
 
