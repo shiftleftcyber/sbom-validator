@@ -30,6 +30,24 @@ Use `go get` to install the package:
 go get github.com/shiftleftcyber/sbom-validator/v2@latest
 ```
 
+## Upgrading To v2
+
+Existing projects pinned to older `v1` versions of `github.com/shiftleftcyber/sbom-validator`
+will continue to work without changes.
+
+To upgrade to `v2`, update your import path and dependency:
+
+```sh
+go get github.com/shiftleftcyber/sbom-validator/v2@latest
+```
+
+```go
+import sbomvalidator "github.com/shiftleftcyber/sbom-validator/v2"
+```
+
+Projects still importing `github.com/shiftleftcyber/sbom-validator` without the `/v2`
+suffix should remain on the `v1` line until they are ready to migrate.
+
 ## Usage
 
 ```go
