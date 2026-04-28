@@ -63,7 +63,7 @@ jobs:
 
       - id: setup-rearm
         name: setup-rearm
-        uses: relizaio/rearm-actions/setup-cli@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
+        uses: relizaio/rearm-actions/setup-cli@3545b39e587d69a2ca339e3c4fee2f0fd67dd18b # v1.3.1
         
       - name: Display rearm version
         shell: bash
@@ -71,7 +71,7 @@ jobs:
         
       - id: init
         name: Initialize ReARM Flow
-        uses: relizaio/rearm-actions/initialize@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
+        uses: relizaio/rearm-actions/initialize@3545b39e587d69a2ca339e3c4fee2f0fd67dd18b # v1.3.1
         with: 
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Generate and sign SBOMs
         id: sbom
-        uses: relizaio/rearm-actions/sbom-sign-scan@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
+        uses: relizaio/rearm-actions/sbom-sign-scan@3545b39e587d69a2ca339e3c4fee2f0fd67dd18b # v1.3.1
         with:
           enable_sbom: true
           deliverable_type: FILE
@@ -100,7 +100,7 @@ jobs:
           echo "REARM_BUILD_LIFECYCLE=ASSEMBLED" >> $GITHUB_ENV
 
       - name: Submit metadata to ReARM and Finalize
-        uses: relizaio/rearm-actions/finalize@50ecfe47014d1025047ecdcfe9b6a2472c1a2f25 # v1.3.0
+        uses: relizaio/rearm-actions/finalize@3545b39e587d69a2ca339e3c4fee2f0fd67dd18b # v1.3.1
         with:
           rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
           rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
