@@ -199,7 +199,7 @@ jobs:
     
       - name: Install pylynk dependencies
         env:
-            INTERLYNK_COMMIT_HASH: '4db3f363aa08a2bd922c98456088705662afff30' #v1.2.3
+            INTERLYNK_COMMIT_HASH: '3aa99e85b5f241e107335b57a9263c5d46134fb5' #v1.2.4
         run: |
           cd pylynk
           git checkout ${{ env.INTERLYNK_COMMIT_HASH }}
