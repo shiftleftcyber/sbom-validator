@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "sbomAuthor": "Example Author",
+    "sbomVersion": "1.0.0",
+    "sbomDataFormatName": "AI SBOM JSON",
+    "sbomDataFormatVersion": "1.0.0",
+    "sbomToolName": "Example Tool",
+    "sbomToolVersion": "1.0.0",
+    "sbomGenerationContext": "after-build",
+    "sbomDependencyRelationships": []
+  },
+  "system": {},
+  "models": [],
+  "datasets": [],
+  "infrastructure": {},
+  "security": {},
+  "kpis": {}
+}

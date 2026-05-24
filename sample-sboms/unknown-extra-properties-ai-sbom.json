@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "bomFormat": "AI-SBOM",
+    "sbomAuthor": "Example Author",
+    "sbomVersion": "1.0.0",
+    "sbomDataFormatName": "AI SBOM JSON",
+    "sbomDataFormatVersion": "1.0.0",
+    "sbomAuthorSignature": {
+      "algorithm": "ecdsa-p256-sha256",
+      "value": "signature"
+    },
+    "sbomToolName": "Example Tool",
+    "sbomToolVersion": "1.0.0",
+    "sbomGenerationContext": "manual",
+    "sbomTimestamp": "2026-05-18T14:22:31Z",
+    "sbomDependencyRelationships": [],
+    "unapprovedField": "This field is not allowed."
+  },
+  "system": {
+    "systemName": [
+      "Example System"
+    ],
+    "systemComponents": [
+      {
+        "name": "Example Model",
+        "type": "ai-model",
+        "version": "1.0.0"
+      }
+    ],
+    "systemProducer": "Example Producer",
+    "systemVersion": "1.0.0",
+    "systemTimestamp": "2026-05-18T14:22:31Z",
+    "systemDataFlow": [
+      {
+        "source": "user",
+        "destination": "model",
+        "description": "Prompt flow."
+      }
+    ],
+    "systemDataUsage": "Prompt processing.",
+    "systemInputOutputProperties": {
+      "inputModalities": [
+        "text"
+      ],
+      "outputModalities": [
+        "text"
+      ],
+      "inputPreprocessing": "Tokenizer."
+    },
+    "intendedApplicationArea": [
+      "example"
+    ]
+  },
+  "models": [
+    {
+      "modelName": [
+        "Example Model"
+      ],
+      "modelIdentifiers": [
+        {
+          "type": "custom",
+          "value": "example-model"
+        }
+      ],
+      "modelVersion": "1.0.0",
+      "modelTimestamp": "2026-05-18T14:22:31Z",
+      "modelProducers": [
+        "Example Producer"
+      ],
+      "modelDescription": {
+        "capabilities": "Example generation.",
+        "knownLimitations": "Example limitation.",
+        "lineage": "Example lineage.",
+        "dependencies": []
+      },
+      "modelHashValue": "not-a-valid-hash",
+      "modelHashAlgorithm": "md5",
+      "modelProperties": {
+        "modelFamily": "neural network",
+        "architecture": "transformer",
+        "parameterCount": 10,
+        "hyperparameters": {}
+      },
+      "modelInputOutputProperties": {
+        "inputModalities": [
+          "text"
+        ],
+        "outputModalities": [
+          "text"
+        ],
+        "contextLength": 1024,
+        "inputPreprocessing": "Tokenizer."
+      },
+      "modelTrainingProperties": {
+        "learningType": "supervised",
+        "trainingStages": [],
+        "documentationUrl": "https://example.com/model-card"
+      },
+      "modelLicense": {
+        "name": "Example License",
+        "url": "https://example.com/license",
+        "openness": {
+          "openWeights": true,
+          "openArchitecture": true,
+          "openData": false,
+          "openTraining": false
+        }
+      },
+      "modelExternalReferences": []
+    }
+  ],
+  "datasets": [],
+  "infrastructure": {
+    "infrastructureSoftware": [],
+    "infrastructureHardware": {
+      "hbomUrl": "https://example.com/hbom",
+      "description": "Example HBOM."
+    }
+  },
+  "security": {
+    "securityControls": [
+      {
+        "name": "API authentication",
+        "category": "general-cybersecurity",
+        "description": "Authenticated API."
+      }
+    ],
+    "securityCompliance": [],
+    "cybersecurityPolicyInformation": "https://example.com/security.txt",
+    "vulnerabilityReferencing": []
+  },
+  "kpis": {
+    "securityMetrics": [],
+    "operationalPerformanceKpis": []
+  }
+}

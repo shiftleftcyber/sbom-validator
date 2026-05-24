@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "bomFormat": "AI-SBOM",
+    "sbomAuthor": "Example Author",
+    "sbomVersion": "1.0.0",
+    "sbomDataFormatName": "AI SBOM JSON",
+    "sbomDataFormatVersion": "1.0.0",
+    "sbomAuthorSignature": {
+      "algorithm": "ecdsa-p256-sha256",
+      "value": "signature"
+    },
+    "sbomToolName": "Example Tool",
+    "sbomToolVersion": "1.0.0",
+    "sbomGenerationContext": "during-lunch",
+    "sbomTimestamp": "not a timestamp",
+    "sbomDependencyRelationships": []
+  },
+  "system": {
+    "systemName": "Example System",
+    "systemComponents": [],
+    "systemProducer": "Example Producer",
+    "systemVersion": 2,
+    "systemTimestamp": "2026-05-18T14:22:31Z",
+    "systemDataFlow": [],
+    "systemDataUsage": "Example usage.",
+    "systemInputOutputProperties": {
+      "inputModalities": [],
+      "outputModalities": [
+        "text"
+      ],
+      "inputPreprocessing": "none"
+    },
+    "intendedApplicationArea": []
+  },
+  "models": [],
+  "datasets": [],
+  "infrastructure": {
+    "infrastructureSoftware": [],
+    "infrastructureHardware": {
+      "hbomUrl": "https://example.com/hbom",
+      "description": "Example HBOM."
+    }
+  },
+  "security": {
+    "securityControls": [],
+    "securityCompliance": [],
+    "cybersecurityPolicyInformation": "https://example.com/security.txt",
+    "vulnerabilityReferencing": []
+  },
+  "kpis": {
+    "securityMetrics": [],
+    "operationalPerformanceKpis": []
+  }
+}

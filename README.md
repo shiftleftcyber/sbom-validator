@@ -10,17 +10,29 @@
 **sbom-validator** is a Go library designed to validate
 **Software Bill of Materials (SBOMs)** against the official
 SBOM specifications. It ensures compliance with formats like
-**CycloneDX** & **SPDX** and helps maintain software supply chain security.
+**CycloneDX**, **SPDX**, and **AI-SBOM** and helps maintain software supply chain security.
 
 ## Features
 
-✅ Detects SBOM type (e.g., CycloneDX, SPDX)
+✅ Detects SBOM type (e.g., CycloneDX, SPDX, AI-SBOM)
 
 ✅ Extracts SBOM version
 
 ✅ Validates SBOM against official schemas
 
 ✅ Provides detailed validation errors
+
+## Supported Formats
+
+- CycloneDX JSON schemas: 1.2, 1.3, 1.4, 1.5, 1.6, 1.7
+- SPDX JSON schemas: 2.2, 2.3
+- AI-SBOM JSON schema: 1.0.0
+
+The AI-SBOM schema is embedded from the immutable schema URL:
+
+```text
+https://shiftleftcyber.io/ai-bom/schemas/ai-sbom-1.0.0.schema.json
+```
 
 ## Installation
 
@@ -55,6 +67,8 @@ suffix should remain on the `v1` line until they are ready to migrate.
 package main
 
 import (
+    "encoding/json"
+    "flag"
     "fmt"
     "log"
     "os"
@@ -82,24 +96,24 @@ func main() {
     }
 
     result, err := sbomvalidator.ValidateSBOMData(jsonData)
-	if err != nil {
-		log.Fatalf("Error during validation - %v", err)
-	}
+    if err != nil {
+        log.Fatalf("Error during validation - %v", err)
+    }
 
     if result.IsValid {
-		output, _ := json.MarshalIndent(result, "", " ")
-		fmt.Println(string(output))
-	} else {
-		fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
+        output, _ := json.MarshalIndent(result, "", " ")
+        fmt.Println(string(output))
+    } else {
+        fmt.Printf("Validation failed! Showing up to %d errors:\n", 10)
 
-		for i, errMsg := range result.ValidationErrors {
-			if i >= 10 {
-				fmt.Printf("...and %d more errors.\n", len(result.ValidationErrors)-10)
-				break
-			}
-			fmt.Printf("- %s\n", errMsg)
-		}
-	}
+        for i, errMsg := range result.ValidationErrors {
+            if i >= 10 {
+                fmt.Printf("...and %d more errors.\n", len(result.ValidationErrors)-10)
+                break
+            }
+            fmt.Printf("- %s\n", errMsg)
+        }
+    }
 }
 ```
 
@@ -139,7 +153,23 @@ DEBUG: 2026/04/07 14:00:00 CycloneDX version is set to: 1.6
  "sbomVersion": "1.6",
  "detectedFormat": "JSON"
 }
+
+./bin/sbom-validator-example -file sample-sboms/customer-support-ai-sbom.json
+{
+ "isValid": true,
+ "sbomType": "AI-SBOM",
+ "sbomVersion": "1.0.0",
+ "detectedFormat": "JSON"
+}
 ```
+
+AI-SBOM examples are included under `sample-sboms/`:
+
+- `customer-support-ai-sbom.json`
+- `medical-triage-ai-sbom.json`
+- `missing-required-metadata.json`
+- `bad-types-and-enums-ai-sbom.json`
+- `unknown-extra-properties-ai-sbom.json`
 
 ## License
 
