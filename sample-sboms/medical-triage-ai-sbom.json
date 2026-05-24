@@ -1,0 +1,277 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "bomFormat": "AI-SBOM",
+    "sbomAuthor": "Northwind Health Security Office",
+    "sbomVersion": "1.1.0",
+    "sbomDataFormatName": "AI SBOM JSON",
+    "sbomDataFormatVersion": "1.0.0",
+    "sbomToolName": "Northwind Supply Chain Ledger",
+    "sbomToolVersion": "unknown",
+    "sbomGenerationContext": "runtime-analysis",
+    "sbomTimestamp": "2026-05-16T18:40:00Z",
+    "sbomDependencyRelationships": [
+      {
+        "source": "Northwind Triage Recommender",
+        "relationship": "includes",
+        "target": "Vitality Classifier"
+      }
+    ]
+  },
+  "system": {
+    "systemName": [
+      "Northwind Triage Recommender",
+      "NTR"
+    ],
+    "systemComponents": [
+      {
+        "name": "Vitality Classifier",
+        "type": "ai-model",
+        "version": "5.0.2",
+        "supplier": "Northwind Health"
+      },
+      {
+        "name": "Clinical Rules Gateway",
+        "type": "software",
+        "version": "4.9.0",
+        "supplier": "Northwind Health"
+      }
+    ],
+    "systemProducer": "Northwind Health",
+    "systemVersion": "5.0.2",
+    "systemTimestamp": "2026-05-10T13:12:00Z",
+    "systemDataFlow": [
+      {
+        "source": "Intake application",
+        "destination": "Clinical Rules Gateway",
+        "description": "Structured intake fields and vital signs are validated against clinical rules.",
+        "protocol": "HTTPS",
+        "externalService": false
+      },
+      {
+        "source": "Clinical Rules Gateway",
+        "destination": "Vitality Classifier",
+        "description": "Validated feature vector is sent for triage risk classification.",
+        "protocol": "gRPC",
+        "externalService": false
+      }
+    ],
+    "systemDataUsage": "Input data is used for triage recommendation and audit logging. Data is not used for online learning.",
+    "systemInputOutputProperties": {
+      "inputModalities": [
+        "structured clinical text",
+        "numeric vital signs"
+      ],
+      "outputModalities": [
+        "classification score",
+        "explanation text"
+      ],
+      "inputPreprocessing": "Schema validation, outlier detection, and feature normalization.",
+      "decisionImpactDocumentationUrl": "https://example.org/northwind/triage/clinical-safety"
+    },
+    "intendedApplicationArea": [
+      "medical healthcare",
+      "clinical triage"
+    ]
+  },
+  "models": [
+    {
+      "modelName": [
+        "Vitality Classifier"
+      ],
+      "modelIdentifiers": [
+        {
+          "type": "uuid",
+          "value": "018f0a7b-ff38-7a3d-9c4f-0b4caed8b212"
+        },
+        {
+          "type": "custom",
+          "value": "northwind:model:vitality-classifier:5.0.2"
+        }
+      ],
+      "modelVersion": "5.0.2",
+      "modelTimestamp": "2026-05-01T08:00:00Z",
+      "modelProducers": [
+        "Northwind Health"
+      ],
+      "modelDescription": {
+        "capabilities": "Classifies patient intake records into triage risk bands.",
+        "knownLimitations": "Not intended for pediatric emergency use or autonomous diagnosis.",
+        "lineage": "Trained from Vitality Classifier 4.8 with new validation cohort calibration.",
+        "dependencies": [
+          "xgboost",
+          "numpy"
+        ]
+      },
+      "modelHashValue": "b1946ac92492d2347c6235b4d2611184b1946ac92492d2347c6235b4d2611184",
+      "modelHashAlgorithm": "sha-256",
+      "modelProperties": {
+        "modelFamily": "non-parametric gradient boosted decision trees",
+        "architecture": "XGBoost ensemble",
+        "parameterCount": "unknown",
+        "hyperparameters": {
+          "maxDepth": 6,
+          "estimators": 500
+        }
+      },
+      "modelInputOutputProperties": {
+        "inputModalities": [
+          "numeric",
+          "categorical",
+          "text-derived features"
+        ],
+        "outputModalities": [
+          "risk score",
+          "risk band"
+        ],
+        "contextLength": "unknown",
+        "inputPreprocessing": "Feature scaling, missing-value imputation, and ICD code normalization."
+      },
+      "modelTrainingProperties": {
+        "learningType": "supervised learning",
+        "trainingStages": [
+          "training",
+          "calibration",
+          "clinical validation"
+        ],
+        "documentationUrl": "https://example.org/northwind/models/vitality-classifier/model-card"
+      },
+      "modelLicense": {
+        "name": "Northwind Proprietary Model License",
+        "url": "https://example.org/northwind/licenses/model-license",
+        "openness": {
+          "openWeights": false,
+          "openArchitecture": false,
+          "openData": false,
+          "openTraining": false
+        }
+      },
+      "modelExternalReferences": [
+        {
+          "type": "validation-report",
+          "url": "https://example.org/northwind/models/vitality-classifier/validation"
+        }
+      ]
+    }
+  ],
+  "datasets": [
+    {
+      "datasetName": "Northwind Deidentified Triage Cohort",
+      "datasetDescription": "Deidentified clinical records used for model training, calibration, and evaluation.",
+      "datasetContent": {
+        "domain": "medical records",
+        "format": "Parquet",
+        "dataModalities": [
+          "structured text",
+          "numeric"
+        ]
+      },
+      "datasetIdentifiers": [
+        {
+          "type": "uri",
+          "value": "https://example.org/northwind/datasets/triage-cohort/2026-01"
+        }
+      ],
+      "datasetHash": {
+        "algorithm": "sha-384",
+        "value": "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7d4c3b2a190e1f3a6eb0790f39ac87c9"
+      },
+      "datasetProvenance": {
+        "origin": "Northwind partner clinics with data use agreements.",
+        "collectionMethods": [
+          "clinical data warehouse export"
+        ],
+        "processingSteps": [
+          "deidentification",
+          "label review",
+          "train validation test split"
+        ],
+        "creator": "Northwind Health Analytics",
+        "syntheticDataMethods": "Synthetic minority oversampling was used only within training folds."
+      },
+      "datasetStatisticalProperties": {
+        "records": 2400000,
+        "positiveClassRate": 0.061,
+        "medianAge": 54
+      },
+      "datasetSensitivity": {
+        "containsPersonalData": false,
+        "containsSensitiveData": true,
+        "containsCopyrightProtectedData": false,
+        "containsNationalSecurityData": false,
+        "description": "Contains deidentified healthcare records with residual clinical sensitivity."
+      },
+      "datasetDependencyRelationships": [],
+      "datasetLicense": {
+        "name": "Restricted Clinical Data Use Agreement",
+        "url": "https://example.org/northwind/data-use/triage-cohort"
+      }
+    }
+  ],
+  "infrastructure": {
+    "infrastructureSoftware": [
+      {
+        "name": "Python",
+        "type": "runtime",
+        "version": "3.12.3",
+        "supplier": "Python Software Foundation"
+      },
+      {
+        "name": "XGBoost",
+        "type": "library",
+        "version": "2.1.0",
+        "supplier": "XGBoost Project"
+      }
+    ],
+    "infrastructureHardware": {
+      "hbomUrl": "https://example.org/northwind/hbom/triage-recommender",
+      "description": "CPU inference cluster and secure enclave configuration."
+    }
+  },
+  "security": {
+    "securityControls": [
+      {
+        "name": "Role-based access control",
+        "category": "general-cybersecurity",
+        "description": "Clinical users must have a triage role assignment to invoke the system."
+      },
+      {
+        "name": "Input anomaly detection",
+        "category": "ai-specific",
+        "description": "Out-of-distribution feature vectors are flagged for manual review."
+      }
+    ],
+    "securityCompliance": [
+      {
+        "name": "HIPAA security risk assessment",
+        "status": "self-attested",
+        "referenceUrl": "https://example.org/northwind/compliance/hipaa-risk-assessment"
+      }
+    ],
+    "cybersecurityPolicyInformation": "https://example.org/.well-known/security.txt",
+    "vulnerabilityReferencing": [
+      {
+        "type": "model-vulnerability-repository",
+        "url": "https://example.org/northwind/security/vitality-classifier"
+      }
+    ]
+  },
+  "kpis": {
+    "securityMetrics": [
+      {
+        "name": "out-of-distribution detection recall",
+        "value": 0.91,
+        "unit": "ratio",
+        "measurementTimestamp": "2026-05-10T00:00:00Z"
+      }
+    ],
+    "operationalPerformanceKpis": [
+      {
+        "name": "incident resolution time",
+        "value": 4.5,
+        "unit": "hours",
+        "measurementTimestamp": "2026-05-10T00:00:00Z"
+      }
+    ]
+  }
+}

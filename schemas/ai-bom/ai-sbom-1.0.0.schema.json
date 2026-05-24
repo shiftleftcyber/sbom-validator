@@ -1,0 +1,922 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shiftleftcyber.io/ai-bom/schemas/ai-sbom-1.0.0.schema.json",
+  "title": "AI Software Bill of Materials",
+  "description": "An AI SBOM schema derived from the G7 SBOM for AI minimum elements document. It captures metadata, system properties, model properties, dataset properties, infrastructure, security properties, and KPIs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "metadata",
+    "system",
+    "models"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "system": {
+      "$ref": "#/$defs/system"
+    },
+    "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dataset"
+      }
+    },
+    "infrastructure": {
+      "$ref": "#/$defs/infrastructure"
+    },
+    "security": {
+      "$ref": "#/$defs/security"
+    },
+    "kpis": {
+      "$ref": "#/$defs/kpis"
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unknownableString": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Use the literal string 'unknown' when the information is unavailable."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "hashAlgorithm": {
+      "type": "string",
+      "enum": [
+        "sha-256",
+        "sha-384",
+        "sha-512",
+        "sha3-256",
+        "sha3-384",
+        "sha3-512",
+        "unknown"
+      ]
+    },
+    "hashValue": {
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "unknown"
+        },
+        {
+          "pattern": "^[A-Fa-f0-9]{64,128}$"
+        }
+      ]
+    },
+    "identifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "cpe",
+            "purl",
+            "uuid",
+            "commit",
+            "omnibor",
+            "swhid",
+            "uri",
+            "custom"
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "externalReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "url"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "url": {
+          "$ref": "#/$defs/uri"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "dependencyRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "relationship",
+        "target"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "includes",
+            "included-in",
+            "depends-on",
+            "derived-from",
+            "descendant-of",
+            "generates",
+            "uses"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bomFormat",
+        "sbomAuthor",
+        "sbomVersion",
+        "sbomDataFormatName",
+        "sbomDataFormatVersion",
+        "sbomTimestamp"
+      ],
+      "properties": {
+        "bomFormat": {
+          "type": "string",
+          "const": "AI-SBOM",
+          "description": "Format discriminator for automation. The fixed value identifies the document as an AI SBOM."
+        },
+        "sbomAuthor": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sbomVersion": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sbomDataFormatName": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sbomDataFormatVersion": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sbomAuthorSignature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "value": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "certificateUrl": {
+              "$ref": "#/$defs/uri"
+            }
+          }
+        },
+        "sbomToolName": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "sbomToolVersion": {
+          "$ref": "#/$defs/unknownableString"
+        },
+        "sbomGenerationContext": {
+          "type": "string",
+          "enum": [
+            "before-build",
+            "build",
+            "after-build",
+            "source-analysis",
+            "binary-analysis",
+            "runtime-analysis",
+            "manual",
+            "unknown"
+          ]
+        },
+        "sbomTimestamp": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "sbomDependencyRelationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependencyRelationship"
+          }
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "systemName",
+        "systemComponents",
+        "systemProducer"
+      ],
+      "properties": {
+        "systemName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "systemComponents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ai-model",
+                  "database",
+                  "software",
+                  "api",
+                  "agent",
+                  "service",
+                  "other"
+                ]
+              },
+              "version": {
+                "$ref": "#/$defs/unknownableString"
+              },
+              "supplier": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            }
+          }
+        },
+        "systemProducer": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "systemVersion": {
+          "$ref": "#/$defs/unknownableString"
+        },
+        "systemTimestamp": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "systemDataFlow": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source",
+              "destination",
+              "description"
+            ],
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "destination": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "description": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "protocol": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "externalService": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "systemDataUsage": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "systemInputOutputProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "inputModalities",
+            "outputModalities",
+            "inputPreprocessing"
+          ],
+          "properties": {
+            "inputModalities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "outputModalities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "inputPreprocessing": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "decisionImpactDocumentationUrl": {
+              "$ref": "#/$defs/uri"
+            }
+          }
+        },
+        "intendedApplicationArea": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelName",
+        "modelIdentifiers",
+        "modelProducers"
+      ],
+      "properties": {
+        "modelName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "modelIdentifiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "modelVersion": {
+          "$ref": "#/$defs/unknownableString"
+        },
+        "modelTimestamp": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "modelProducers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "modelDescription": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "capabilities"
+          ],
+          "properties": {
+            "capabilities": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "knownLimitations": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "lineage": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "dependencies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            }
+          }
+        },
+        "modelHashValue": {
+          "$ref": "#/$defs/hashValue"
+        },
+        "modelHashAlgorithm": {
+          "$ref": "#/$defs/hashAlgorithm"
+        },
+        "modelProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "modelFamily"
+          ],
+          "properties": {
+            "modelFamily": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "architecture": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "parameterCount": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            "hyperparameters": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "modelInputOutputProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "inputModalities",
+            "outputModalities"
+          ],
+          "properties": {
+            "inputModalities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "outputModalities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "contextLength": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            "inputPreprocessing": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        "modelTrainingProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "learningType"
+          ],
+          "properties": {
+            "learningType": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "trainingStages": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "documentationUrl": {
+              "$ref": "#/$defs/uri"
+            }
+          }
+        },
+        "modelLicense": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "url": {
+              "$ref": "#/$defs/uri"
+            },
+            "openness": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "openWeights"
+              ],
+              "properties": {
+                "openWeights": {
+                  "type": "boolean"
+                },
+                "openArchitecture": {
+                  "type": "boolean"
+                },
+                "openData": {
+                  "type": "boolean"
+                },
+                "openTraining": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "modelExternalReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/externalReference"
+          }
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datasetName",
+        "datasetDescription"
+      ],
+      "properties": {
+        "datasetName": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "datasetDescription": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "datasetContent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "domain"
+          ],
+          "properties": {
+            "domain": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "format": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "dataModalities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            }
+          }
+        },
+        "datasetIdentifiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "datasetHash": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "value"
+          ],
+          "properties": {
+            "algorithm": {
+              "$ref": "#/$defs/hashAlgorithm"
+            },
+            "value": {
+              "$ref": "#/$defs/hashValue"
+            }
+          }
+        },
+        "datasetProvenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "origin"
+          ],
+          "properties": {
+            "origin": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "collectionMethods": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "processingSteps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            },
+            "creator": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "syntheticDataMethods": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        "datasetStatisticalProperties": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "datasetSensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description"
+          ],
+          "properties": {
+            "containsPersonalData": {
+              "type": "boolean"
+            },
+            "containsSensitiveData": {
+              "type": "boolean"
+            },
+            "containsCopyrightProtectedData": {
+              "type": "boolean"
+            },
+            "containsNationalSecurityData": {
+              "type": "boolean"
+            },
+            "description": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        "datasetDependencyRelationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependencyRelationship"
+          }
+        },
+        "datasetLicense": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "url": {
+              "$ref": "#/$defs/uri"
+            }
+          }
+        }
+      }
+    },
+    "infrastructure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "infrastructureSoftware"
+      ],
+      "properties": {
+        "infrastructureSoftware": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "firmware",
+                  "package-manager",
+                  "library",
+                  "framework",
+                  "runtime",
+                  "tool",
+                  "service",
+                  "other"
+                ]
+              },
+              "version": {
+                "$ref": "#/$defs/unknownableString"
+              },
+              "supplier": {
+                "$ref": "#/$defs/nonEmptyString"
+              }
+            }
+          }
+        },
+        "infrastructureHardware": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hbomUrl"
+          ],
+          "properties": {
+            "hbomUrl": {
+              "$ref": "#/$defs/uri"
+            },
+            "description": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "securityControls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "category"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "general-cybersecurity",
+                  "ai-specific",
+                  "physical",
+                  "administrative",
+                  "technical"
+                ]
+              },
+              "description": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "referenceUrl": {
+                "$ref": "#/$defs/uri"
+              }
+            }
+          }
+        },
+        "securityCompliance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "certified",
+                  "self-attested",
+                  "in-progress",
+                  "not-assessed",
+                  "not-applicable"
+                ]
+              },
+              "referenceUrl": {
+                "$ref": "#/$defs/uri"
+              }
+            }
+          }
+        },
+        "cybersecurityPolicyInformation": {
+          "$ref": "#/$defs/uri"
+        },
+        "vulnerabilityReferencing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/externalReference"
+          }
+        }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "securityMetrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "$ref": "#/$defs/nonEmptyString"
+                  }
+                ]
+              },
+              "unit": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "measurementTimestamp": {
+                "$ref": "#/$defs/timestamp"
+              }
+            }
+          }
+        },
+        "operationalPerformanceKpis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "$ref": "#/$defs/nonEmptyString"
+                  }
+                ]
+              },
+              "unit": {
+                "$ref": "#/$defs/nonEmptyString"
+              },
+              "measurementTimestamp": {
+                "$ref": "#/$defs/timestamp"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

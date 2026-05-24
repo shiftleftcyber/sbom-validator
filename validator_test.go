@@ -26,6 +26,18 @@ func TestDetectSBOMType(t *testing.T) {
 			expectErr: false,
 		},
 		{
+			name:      "Valid AI-SBOM with metadata bomFormat",
+			jsonData:  `{"schemaVersion": "1.0.0", "metadata": {"bomFormat": "AI-SBOM"}, "system": {}, "models": []}`,
+			want:      "AI-SBOM",
+			expectErr: false,
+		},
+		{
+			name:      "AI-SBOM shape without metadata bomFormat",
+			jsonData:  `{"schemaVersion": "1.0.0", "metadata": {}, "system": {}, "models": []}`,
+			want:      "AI-SBOM",
+			expectErr: false,
+		},
+		{
 			name:      "Missing bomFormat field",
 			jsonData:  `{"specVersion": "1.4"}`,
 			expectErr: true,
@@ -86,6 +98,12 @@ func TestLoadSchema(t *testing.T) {
 			wantErr:  false,
 		},
 		{
+			name:     "Valid AI-SBOM Schema",
+			version:  "1.0.0",
+			sbomType: SBOM_AI,
+			wantErr:  false,
+		},
+		{
 			name:     "Schema File Not Found",
 			version:  "2.0", // This version does not exist in embedded schemas
 			sbomType: SBOM_CYCLONEDX,
@@ -142,6 +160,13 @@ func TestExtractVersion(t *testing.T) {
 			sbomType:  "SPDX",
 			expectErr: false,
 			wantValue: "SPDX-2.3",
+		},
+		{
+			name:      "Valid AI-SBOM",
+			jsonData:  `{"schemaVersion": "1.0.0"}`,
+			sbomType:  SBOM_AI,
+			expectErr: false,
+			wantValue: "1.0.0",
 		},
 		{
 			name:      "Missing specVersion field",
@@ -297,6 +322,70 @@ func TestValidateSBOMDataOfflineCycloneDX(t *testing.T) {
 
 			if !result.IsValid {
 				t.Fatalf("expected %s to be valid, got errors: %v", tt.path, result.ValidationErrors)
+			}
+		})
+	}
+}
+
+func TestValidateSBOMDataOfflineAISBOM(t *testing.T) {
+	tests := []struct {
+		name      string
+		path      string
+		wantValid bool
+	}{
+		{
+			name:      "Customer Support AI-SBOM",
+			path:      "sample-sboms/customer-support-ai-sbom.json",
+			wantValid: true,
+		},
+		{
+			name:      "Medical Triage AI-SBOM",
+			path:      "sample-sboms/medical-triage-ai-sbom.json",
+			wantValid: true,
+		},
+		{
+			name:      "Missing Required Metadata",
+			path:      "sample-sboms/missing-required-metadata.json",
+			wantValid: false,
+		},
+		{
+			name:      "Bad Types And Enums",
+			path:      "sample-sboms/bad-types-and-enums-ai-sbom.json",
+			wantValid: false,
+		},
+		{
+			name:      "Unknown Extra Properties",
+			path:      "sample-sboms/unknown-extra-properties-ai-sbom.json",
+			wantValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sbomData, err := os.ReadFile(tt.path)
+			if err != nil {
+				t.Fatalf("failed to read %s: %v", tt.path, err)
+			}
+
+			result, err := ValidateSBOMData(sbomData)
+			if err != nil {
+				t.Fatalf("expected AI-SBOM validation to run for %s: %v", tt.path, err)
+			}
+
+			if result.SBOMType != SBOM_AI {
+				t.Fatalf("expected SBOM type %q, got %q", SBOM_AI, result.SBOMType)
+			}
+
+			if result.SBOMVersion != "1.0.0" {
+				t.Fatalf("expected SBOM version 1.0.0, got %q", result.SBOMVersion)
+			}
+
+			if result.IsValid != tt.wantValid {
+				t.Fatalf("expected validity %v for %s, got %v with errors: %v", tt.wantValid, tt.path, result.IsValid, result.ValidationErrors)
+			}
+
+			if !tt.wantValid && len(result.ValidationErrors) == 0 {
+				t.Fatalf("expected validation errors for invalid AI-SBOM %s", tt.path)
 			}
 		})
 	}

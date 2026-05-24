@@ -14,6 +14,7 @@ import (
 const (
 	SBOM_CYCLONEDX = "CycloneDX"
 	SBOM_SPDX      = "SPDX"
+	SBOM_AI        = "AI-SBOM"
 )
 
 const cyclonedxSchemaBaseURL = "http://cyclonedx.org/schema/"
@@ -75,9 +76,9 @@ type ValidationResult struct {
 	DetectedFormat   string   `json:"detectedFormat,omitempty"`
 }
 
-// Embed all JSON schema files from the schemas/cyclonedx directory
+// Embed all JSON schema files from the schemas directory.
 //
-//go:embed schemas/cyclonedx/*.json schemas/spdx/*.json
+//go:embed schemas/cyclonedx/*.json schemas/spdx/*.json schemas/ai-bom/*.json
 var schemaFS embed.FS
 
 // ValidateSBOMData is the main function to validate SBOM data using this library.
@@ -85,7 +86,7 @@ var schemaFS embed.FS
 // This function serves as a wrapper around multiple internal functions, making it the
 // recommended entry point for validating SBOMs. It performs the following steps:
 // 1. Detects whether the SBOM is in JSON format.
-// 2. Determines the SBOM type (CycloneDX, SPDX, etc.).
+// 2. Determines the SBOM type (CycloneDX, SPDX, AI-SBOM, etc.).
 // 3. Extracts the schema version from the SBOM data.
 // 4. Loads the corresponding schema for validation.
 // 5. Validates the SBOM against the schema and returns the validation result.
@@ -101,13 +102,13 @@ var schemaFS embed.FS
 // Errors:
 //   - Returns an error if the SBOM format is not JSON.
 //   - Returns an error if SBOM type detection fails.
-//   - Returns an error if the SBOM type is not CycloneDX (currently the only supported format).
+//   - Returns an error if the SBOM type is unsupported.
 //   - Returns an error if extracting the SBOM version fails.
 //   - Returns an error if loading the schema fails.
 //
 // Note:
 //   - This function abstracts multiple lower-level functions, such as `DetectSBOMType`,
-//     `ExtractVersion`, `LoadSchema`, and `ValidateSBOM`. Instead of calling those
+//     `extractSBOMVersion`, `loadSBOMSchema`, and `validateSBOM`. Instead of calling those
 //     individually, use `ValidateSBOMData` for a streamlined validation process.
 //
 // Example usage:
@@ -177,7 +178,7 @@ func ValidateSBOMData(sbomContent []byte) (*ValidationResult, error) {
 //
 // Returns:
 //   - A string representing the detected SBOM format.
-//   - An error if the JSON is invalid or the "bomFormat" field is missing.
+//   - An error if the JSON is invalid or no supported SBOM discriminator is found.
 //
 // Example:
 //
@@ -198,6 +199,23 @@ func detectSBOMType(jsonData string) (string, error) {
 	if ok {
 		debugLogger.Printf("%s SBOM type detected", cyclonedxFormat)
 		return cyclonedxFormat, nil
+	}
+
+	if metadata, ok := obj["metadata"].(map[string]interface{}); ok {
+		if bomFormat, ok := metadata["bomFormat"].(string); ok && bomFormat == SBOM_AI {
+			debugLogger.Printf("%s SBOM type detected", bomFormat)
+			return bomFormat, nil
+		}
+	}
+
+	if schemaVersion, ok := obj["schemaVersion"].(string); ok && schemaVersion != "" {
+		_, hasMetadata := obj["metadata"]
+		_, hasSystem := obj["system"]
+		_, hasModels := obj["models"]
+		if hasMetadata && hasSystem && hasModels {
+			debugLogger.Printf("%s SBOM type detected", SBOM_AI)
+			return SBOM_AI, nil
+		}
 	}
 
 	spdxVersion, ok := obj["spdxVersion"].(string)
@@ -284,7 +302,7 @@ func addOfflineFallbackSchemas(loader *gojsonschema.SchemaLoader) error {
 // extractSBOMVersion extracts the "version" field from an SBOM JSON string.
 //
 // This function parses the provided JSON data and retrieves the version field
-// based on the specified SBOM type. Currently, it supports CycloneDX SBOMs.
+// based on the specified SBOM type.
 //
 // Parameters:
 //   - jsonData: A string containing the SBOM JSON data.
@@ -325,6 +343,14 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 
 		debugLogger.Println("SPDX version is set to:", version)
 		return version, nil
+	} else if sbomType == SBOM_AI {
+		version, ok := obj["schemaVersion"].(string)
+		if !ok {
+			return "", fmt.Errorf(`"schemaVersion" field missing or not a string`)
+		}
+
+		debugLogger.Println("AI-SBOM version is set to:", version)
+		return version, nil
 	}
 
 	return "", fmt.Errorf("unknown SBOM Format")
@@ -337,8 +363,7 @@ func extractSBOMVersion(jsonData string, sbomType string) (string, error) {
 //
 // Parameters:
 //   - version: The version of the SBOM schema (e.g., "1.4").
-//   - schemaDir: The directory where schema files are stored.
-//   - sbomType: The type of SBOM (currently supports "CycloneDX").
+//   - sbomType: The type of SBOM.
 //
 // Returns:
 //   - A string containing the JSON schema content.
@@ -356,6 +381,8 @@ func loadSBOMSchema(version string, sbomType string) (string, error) {
 
 	if sbomType == SBOM_CYCLONEDX {
 		schemaFile = fmt.Sprintf("schemas/cyclonedx/bom-%s.schema.json", version)
+	} else if sbomType == SBOM_AI {
+		schemaFile = fmt.Sprintf("schemas/ai-bom/ai-sbom-%s.schema.json", version)
 	} else if strings.Contains(sbomType, SBOM_SPDX) {
 		spdxVersion, err := getSPDXVersion(version)
 		if err != nil {
