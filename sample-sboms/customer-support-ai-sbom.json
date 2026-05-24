@@ -7,8 +7,15 @@
     "sbomDataFormatName": "AI SBOM JSON",
     "sbomDataFormatVersion": "1.0.0",
     "sbomAuthorSignature": {
-      "algorithm": "ecdsa-p256-sha256",
-      "value": "MEUCIQDV8xF3h3Tn0Qj1exampleSignatureValue"
+      "algorithm": "ES256",
+      "keyId": "contoso-ai-sbom-signing-key-2026",
+      "publicKey": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "6BKxpty8cI-exDzCkh-goU6dXq3MbcY0cd1LaAxiNrU",
+        "y": "mCbcvUzm44j3Lt2b5BPyQloQ91tf2D2V-gzeUxWaUdg"
+      },
+      "value": "ybT1qz5zHNi4Ndc6y7Zhamuf51IqXkPkZwjH1XcC-KSuBiaQplTw6Jasf2MbCLg3CF7PAdnMO__WSLwvI5r2jA"
     },
     "sbomToolName": "Contoso AI Inventory Builder",
     "sbomToolVersion": "2.4.1",

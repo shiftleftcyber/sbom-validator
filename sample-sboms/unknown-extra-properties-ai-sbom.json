@@ -7,7 +7,7 @@
     "sbomDataFormatName": "AI SBOM JSON",
     "sbomDataFormatVersion": "1.0.0",
     "sbomAuthorSignature": {
-      "algorithm": "ecdsa-p256-sha256",
+      "algorithm": "ES256",
       "value": "signature"
     },
     "sbomToolName": "Example Tool",
