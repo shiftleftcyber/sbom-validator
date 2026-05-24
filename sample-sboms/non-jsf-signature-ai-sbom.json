@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "bomFormat": "AI-SBOM",
+    "sbomAuthor": "Example Author",
+    "sbomVersion": "1.0.0",
+    "sbomDataFormatName": "AI SBOM JSON",
+    "sbomDataFormatVersion": "1.0.0",
+    "sbomTimestamp": "2026-05-18T14:22:31Z",
+    "sbomAuthorSignature": {
+      "algorithm": "ecdsa-p256-sha256",
+      "certificateUrl": "https://example.com/certs/signing.pem",
+      "value": "signature"
+    }
+  },
+  "system": {
+    "systemName": [
+      "Example System"
+    ],
+    "systemComponents": [
+      {
+        "name": "Example Model",
+        "type": "ai-model"
+      }
+    ],
+    "systemProducer": "Example Producer"
+  },
+  "models": [
+    {
+      "modelName": [
+        "Example Model"
+      ],
+      "modelIdentifiers": [
+        {
+          "type": "custom",
+          "value": "example-model"
+        }
+      ],
+      "modelProducers": [
+        "Example Producer"
+      ]
+    }
+  ]
+}

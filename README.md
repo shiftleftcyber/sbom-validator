@@ -34,6 +34,9 @@ The AI-SBOM schema is embedded from the immutable schema URL:
 https://shiftleftcyber.io/ai-bom/schemas/ai-sbom-1.0.0.schema.json
 ```
 
+AI-SBOM author signatures are validated against the schema's JSF `signaturecore`
+shape when `metadata.sbomAuthorSignature` is present.
+
 ## Installation
 
 Use `go get` to install the package:
@@ -169,6 +172,7 @@ AI-SBOM examples are included under `sample-sboms/`:
 - `medical-triage-ai-sbom.json`
 - `missing-required-metadata.json`
 - `bad-types-and-enums-ai-sbom.json`
+- `non-jsf-signature-ai-sbom.json`
 - `unknown-extra-properties-ai-sbom.json`
 
 ## License

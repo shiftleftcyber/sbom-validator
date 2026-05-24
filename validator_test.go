@@ -354,6 +354,11 @@ func TestValidateSBOMDataOfflineAISBOM(t *testing.T) {
 			wantValid: false,
 		},
 		{
+			name:      "Non-JSF Signature",
+			path:      "sample-sboms/non-jsf-signature-ai-sbom.json",
+			wantValid: false,
+		},
+		{
 			name:      "Unknown Extra Properties",
 			path:      "sample-sboms/unknown-extra-properties-ai-sbom.json",
 			wantValid: false,
