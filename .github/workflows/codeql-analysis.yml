@@ -22,12 +22,12 @@ jobs:
       security-events: write
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # tag=v4.3.1
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # tag=v4.4.0
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@03e4368ac7daa2bd82b3e85262f3bf87ee112f57 # tag=v2.11.2
+      uses: github/codeql-action/init@08d09a53f0f5d694f253bd25732e4429c9e9337f # tag=v2.11.2
       with:
         languages: "go"
     - name: Run Autobuild
-      uses: github/codeql-action/autobuild@03e4368ac7daa2bd82b3e85262f3bf87ee112f57 # tag=v2.11.2
+      uses: github/codeql-action/autobuild@08d09a53f0f5d694f253bd25732e4429c9e9337f # tag=v2.11.2
     - name: Perform Analysis
-      uses: github/codeql-action/analyze@03e4368ac7daa2bd82b3e85262f3bf87ee112f57 # tag=v2.11.2
+      uses: github/codeql-action/analyze@08d09a53f0f5d694f253bd25732e4429c9e9337f # tag=v2.11.2
