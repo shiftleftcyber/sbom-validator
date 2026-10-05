@@ -1,35 +1,20 @@
-name: golangci-lint
+name: Go Lint
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
   workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   lint:
-    name: 🔍 Lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-
-      - name: Install Dependencies
-        run: go mod download
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9.2.1
-        with:
-          version: v2.8
-
-      - name: Add Job Summary
-        run: |
-          echo "### 🔍 Lint Results" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Code linting completed successfully" >> $GITHUB_STEP_SUMMARY
+    permissions:
+      contents: read
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/go-lint.yml@08214ced07c278eaed1c68fa459916e07f071553
+    with:
+      go-version-file: go.mod
+      golangci-lint-version: v2.8.0
+      working-directory: .
