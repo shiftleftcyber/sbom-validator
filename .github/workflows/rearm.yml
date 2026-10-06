@@ -3,123 +3,63 @@ name: ReARM Workflow
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: read
 
 jobs:
-  setup:
-    name: Determine Project Version
+  version:
+    name: Determine project version
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
-      sanitized_project_version: ${{ steps.setversion.outputs.sanitized_project_version }}
-    
+      project-version: ${{ steps.version.outputs.project-version }}
     steps:
-        - name: Checkout (with tags)
-          uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-          with:
-            fetch-depth: 0
-            fetch-tags: true
-        
-        - name: Set Project Version
-          id: setversion
-          shell: bash
-          run: |
-            echo "GITHUB_REF=${GITHUB_REF}"
-            echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
-
-            LATEST_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
-
-            if [[ -z "$LATEST_TAG" ]]; then
-              echo "No version tags found (vX.Y.Z required)"
-              exit 1
-            fi
-
-            BASE_VERSION="${LATEST_TAG#v}"
-
-            if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-              VERSION="${GITHUB_REF_NAME#v}"
-            elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-              VERSION="${BASE_VERSION}-main-${GITHUB_RUN_NUMBER}"
-            else
-              VERSION="${BASE_VERSION}-dev-${GITHUB_RUN_NUMBER}"
-            fi
-
-            echo "Resolved project version: ${VERSION}"
-            echo "sanitized_project_version=${VERSION}" >> "$GITHUB_OUTPUT"
-
-            echo "Final output:"
-            cat "$GITHUB_OUTPUT"
-
-  sign-with-rearm:
-    name: ReARM - Generate, Sign & Send
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Check out tags
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
 
-      - id: setup-rearm
-        name: setup-rearm
-        uses: relizaio/rearm-actions/setup-cli@40bd23d8f2b442c1781a32cdcd5891318a69a1ae # v1.5.0
-        
-      - name: Display rearm version
-        shell: bash
-        run: rearm version
-        
-      - id: init
-        name: Initialize ReARM Flow
-        uses: relizaio/rearm-actions/initialize@40bd23d8f2b442c1781a32cdcd5891318a69a1ae # v1.5.0
-        with: 
-          rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
-          rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ vars.REARM_API_URL }}
-          component: ${{ vars.REARM_COMPONENT_ID }}
-          version: ${{ needs.setup.outputs.sanitized_project_version }}
-          allow_rebuild: true          
-
-      - name: Generate and sign SBOMs
-        id: sbom
-        uses: relizaio/rearm-actions/sbom-sign-scan@40bd23d8f2b442c1781a32cdcd5891318a69a1ae # v1.5.0
-        with:
-          enable_sbom: true
-          deliverable_type: FILE
-          source_code_sbom_type: custom
-          enable_securesbom: true
-          securesbom_host: ${{ vars.SECURE_SBOM_API_URL }}
-          securesbom_pub_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
-          securesbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-          rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
-          rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
-    
-      - name: TEMP - add REARM_BUILD_LIFECYCLE
+      - name: Resolve project version
+        id: version
         shell: bash
         run: |
-          echo "REARM_BUILD_LIFECYCLE=ASSEMBLED" >> $GITHUB_ENV
+          set -euo pipefail
+          mapfile -t release_tags < <(git tag --list 'v*' --sort=-v:refname)
+          latest_tag="${release_tags[0]:-}"
+          if [[ ! "${latest_tag}" =~ ^v[0-9]+[.][0-9]+[.][0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "No valid vX.Y.Z release tag was found."
+            exit 1
+          fi
 
-      - name: Submit metadata to ReARM and Finalize
-        uses: relizaio/rearm-actions/finalize@40bd23d8f2b442c1781a32cdcd5891318a69a1ae # v1.5.0
-        with:
-          rearm_api_id: ${{ secrets.REARM_COMPONENT_API_ID }}
-          rearm_api_key: ${{ secrets.REARM_COMPONENT_API_KEY }}
-          rearm_api_url: ${{ vars.REARM_API_URL }}
-          component: ${{ vars.REARM_COMPONENT_ID }}
-          rearm_build_start: ${{ steps.init.outputs.build_start }}
-          rearm_build_lifecycle: 'ASSEMBLED'
-          deliverable_type: 'FILE'
-          commit_list: ${{ steps.init.outputs.commit_list }}
-          sce_commit: ${{ steps.init.outputs.sce_commit }}
-          sce_commit_message: ${{ steps.init.outputs.sce_commit_message }}
-          sce_commit_date: ${{ steps.init.outputs.sce_commit_date }}
-          sce_vcs_uri: ${{ steps.init.outputs.sce_vcs_uri }}
-          scearts: ${{ steps.sbom.outputs.scearts }}
-          rearm_short_version: ${{ needs.setup.outputs.sanitized_project_version }}
-          rearm_full_version: ${{ needs.setup.outputs.sanitized_project_version }}
-          
-      - name: Add Job Summary
-        if: always()
-        run: |
-          echo "### 📤 SBOM Upload to ReARM" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ SBOM uploaded successfully to ReARM" >> $GITHUB_STEP_SUMMARY
+          base_version="${latest_tag#v}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            project_version="${GITHUB_REF_NAME#v}"
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            project_version="${base_version}-main-${GITHUB_RUN_NUMBER}"
+          else
+            project_version="${base_version}-dev-${GITHUB_RUN_NUMBER}"
+          fi
+          echo "project-version=${project_version}" >> "${GITHUB_OUTPUT}"
+
+  evidence:
+    needs: version
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/rearm.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    with:
+      artifact-name: rearm-signed-sbom
+      component-id: ${{ vars.REARM_COMPONENT_ID }}
+      deliverable-name: sbom-validator
+      project-version: ${{ needs.version.outputs.project-version }}
+      rearm-api-url: ${{ vars.REARM_API_URL }}
+      secure-sbom-api-url: ${{ vars.SECURE_SBOM_API_URL }}
+      secure-sbom-signing-key-id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
+    secrets:
+      rearm-api-id: ${{ secrets.REARM_COMPONENT_API_ID }}
+      rearm-api-key: ${{ secrets.REARM_COMPONENT_API_KEY }}
+      secure-sbom-api-key: ${{ secrets.SECURE_SBOM_API_KEY }}
