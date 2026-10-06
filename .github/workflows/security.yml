@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   security:
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/security-go.yml@08214ced07c278eaed1c68fa459916e07f071553
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/security-go.yml@c4b3a0e6e31f5b47d5f792da6b39eee0f058c9a9
     with:
       go-version-file: go.mod
       working-directory: .
