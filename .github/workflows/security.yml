@@ -1,0 +1,21 @@
+name: Go Security
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "30 12 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security:
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/security-go.yml@d175f38df5c7934cadbc5a9024d21bce9ac55530
+    with:
+      go-version-file: go.mod
+      working-directory: .
