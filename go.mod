@@ -1,6 +1,6 @@
 module github.com/shiftleftcyber/sbom-validator/v2
 
-go 1.25.7
+go 1.25.13
 
 require github.com/xeipuuv/gojsonschema v1.2.0
 
