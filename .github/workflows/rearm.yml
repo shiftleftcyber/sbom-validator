@@ -50,7 +50,7 @@ jobs:
 
   evidence:
     needs: version
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/rearm.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/rearm.yml@v1
     with:
       artifact-name: rearm-signed-sbom
       component-id: ${{ vars.REARM_COMPONENT_ID }}
