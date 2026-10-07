@@ -3,254 +3,45 @@ name: Release Workflow
 on:
   push:
     tags:
-      - 'v*'
+      - "v*.*.*"
 
 permissions:
   actions: read
-  security-events: write
+  attestations: write
   contents: write
+  id-token: write
 
 jobs:
+  source-sbom:
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/source-sbom-go.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    with:
+      artifact-name: signed-release-sbom
+      fail-on-vulnerabilities: true
+      file-prefix: sbom-validator-${{ github.ref_name }}
+      go-version-file: go.mod
+      secure-sbom-signing-key-id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
+      source-directory: .
+    secrets:
+      secure-sbom-api-key: ${{ secrets.SECURE_SBOM_API_KEY }}
+
   release:
-    name: 🚀 Perform GitHub Release
-    runs-on: ubuntu-latest
-    needs: [osv-scan]
+    needs: source-sbom
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/release-go.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    with:
+      config: .goreleaser.yml
+      evidence-artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
+      evidence-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
+      go-version-file: go.mod
+      update-major-tag: true
+      working-directory: .
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-        with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: 'go.mod'
-          check-latest: true
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
-        with:
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Add Job Summary
-        run: |
-          echo "### 🚀 Release Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GoReleaser successfully published binaries and SBOM" >> $GITHUB_STEP_SUMMARY
-
-  generate_sbom:
-    name: 🔏 Generate SBOM
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-      - name: Setup Go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: 'go.mod'
-          check-latest: true
-
-      - name: Generate SBOM (CycloneDX)
-        uses: CycloneDX/gh-gomod-generate-sbom@efc74245d6802c8cefd925620515442756c70d8f # v2.0.0
-        with:
-          version: v1
-          args: mod -licenses -json -output-version 1.6 -output sbom-validator.${{ github.ref_name }}.cdx.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: unsigned-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.json
-          retention-days: 7
-
-      - name: Add Job Summary
-        run: |
-          echo "### 🔏 SBOM Generated & Signed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ CycloneDX SBOM created" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔐 Signed with SecureSBOM API" >> $GITHUB_STEP_SUMMARY
-          echo "- 📦 Uploaded as release asset" >> $GITHUB_STEP_SUMMARY
-  
-  sign-sbom:
-    name: Sign SBOM via SecureSBOM
-    needs: generate_sbom
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download Signed SBOM
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: unsigned-sbom
-          path: .
-    
-      - name: Sign SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@542dffaadd81bc0614947d749720558a399e6454 # v2.4.0
-        with:
-          sbom_file: sbom-validator.${{ github.ref_name }}.cdx.json
-          secure_sbom_action: sign_sbom
-          secure_sbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-          secure_sbom_signing_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
-      
-      - name: Verify SBOM via SecureSBOM
-        uses: shiftleftcyber/secure-sbom-action@542dffaadd81bc0614947d749720558a399e6454 # v2.4.0
-        with:
-            sbom_file: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-            secure_sbom_action: verify
-            secure_sbom_api_key: ${{ secrets.SECURE_SBOM_API_KEY }}
-            secure_sbom_signing_key_id: ${{ vars.SECURE_SBOM_SIGNING_KEY_ID }}
-
-      - name: Upload Signed SBOM
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: signed-sbom
-          path: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-          retention-days: 7
-
-      - name: Upload Signed SBOM to Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
-        with:
-          files: sbom-validator.${{ github.ref_name }}.cdx.signed.json
-
-  osv-scan:
-    name: 🔎 OSV Scan
-    needs: sign-sbom
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
-
-    steps:
-      - name: Download Signed SBOM
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: signed-sbom
-          path: .
-
-      - name: Run OSV Scanner
-        run: |
-          cp sbom-validator.${{ github.ref_name }}.cdx.signed.json bom.json
-          docker run --rm -v ${{ github.workspace }}:/opt --workdir /opt ghcr.io/google/osv-scanner:latest \
-            scan --lockfile bom.json \
-            --format json --output osv-scan-report.json || true
-
-      - name: Upload OSV Report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: osv-scan-report
-          path: osv-scan-report.json
-    
-      - name: Enforce Security Gate
-        id: enforce-gate
-        run: |
-          echo "🔍 Evaluating OSV scan results..."
-          COUNT=$(jq '[.results[] | select(.severity == "HIGH" or .severity == "CRITICAL")] | length' osv-scan-report.json)
-          if [ "$COUNT" -gt 0 ]; then
-            echo "❌ Blocking release - $COUNT high/critical vulnerabilities detected!"
-            jq '.results[] | select(.severity == "HIGH" or .severity == "CRITICAL") | {package: .package.name, severity: .severity, summary: .summary}' osv-scan-report.json
-            echo "blocked=true" >> $GITHUB_OUTPUT
-            exit 1
-          else
-            echo "✅ No blocking vulnerabilities found."
-            echo "blocked=false" >> $GITHUB_OUTPUT
-          fi
-    
-      - name: Add Job Summary
-        if: always()
-        run: |
-          echo "### 🔒 OSV Vulnerability Scan Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Scan file:** \`osv-scan-report.json\`" >> $GITHUB_STEP_SUMMARY
-          if [[ '${{ steps.enforce-gate.outputs.blocked }}' == 'true' ]]; then
-            echo "- ❌ **High/Critical vulnerabilities found — release blocked**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- ✅ **No blocking vulnerabilities detected — safe to proceed**" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "For full report, download the [osv-scan-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
-    
-  upload-sbom:
-    name: Upload SBOM to Interlynk
-    needs: sign-sbom
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Signed SBOM
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: signed-sbom
-          path: .
-    
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: '3.11'
-     
-      - name: Clone Interlynk pylynk
-        run: git clone --depth=1 https://github.com/interlynk-io/pylynk.git
-    
-      - name: Install pylynk dependencies
-        env:
-            INTERLYNK_COMMIT_HASH: '4db3f363aa08a2bd922c98456088705662afff30' #v1.2.3
-        run: |
-          cd pylynk
-          git checkout ${{ env.INTERLYNK_COMMIT_HASH }}
-          pip install -r requirements.txt
-          
-      - name: Upload SBOM to Interlynk
-        env:
-          INTERLYNK_SECURITY_TOKEN: ${{ secrets.INTERLYNK_TOKEN }}
-        run: |
-          cd pylynk
-          python3 pylynk.py upload --prod 'sbom-validator' --env "Production" --sbom ../sbom-validator.${{ github.ref_name }}.cdx.signed.json
-    
-      - name: Add Job Summary
-        if: always()
-        run: |
-          echo "### 📤 SBOM Upload to Interlynk" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ SBOM uploaded successfully to Interlynk" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔗 Project: \`sbom-validator-main\`" >> $GITHUB_STEP_SUMMARY
-          echo "- File: \`sbom-validator.${{ github.ref_name }}.cdx.json\`" >> $GITHUB_STEP_SUMMARY
-
-  update-major-tag:
-    name: Update Major Tag Alias
-    needs: [release]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-        with:
-          fetch-depth: 0
-
-      - name: Update moving major tag
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          case "$RELEASE_TAG" in
-            v[0-9]*.[0-9]*.[0-9]*)
-              MAJOR_TAG="$(echo "$RELEASE_TAG" | cut -d. -f1)"
-              ;;
-            *)
-              echo "Tag $RELEASE_TAG is not a semver release tag; skipping major tag update."
-              exit 0
-              ;;
-          esac
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git tag -fa "$MAJOR_TAG" -m "Update $MAJOR_TAG to $RELEASE_TAG" "$GITHUB_SHA"
-          git push origin "refs/tags/$MAJOR_TAG" --force
-
-      - name: Add Job Summary
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          MAJOR_TAG="$(echo "$RELEASE_TAG" | cut -d. -f1)"
-          echo "### 🏷️ Major Tag Alias Updated" >> $GITHUB_STEP_SUMMARY
-          echo "- Release tag: \`$RELEASE_TAG\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Moving major tag: \`$MAJOR_TAG\`" >> $GITHUB_STEP_SUMMARY
+  publish-interlynk:
+    needs: source-sbom
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/publish-sbom-interlynk.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    with:
+      artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
+      environment: Production
+      product: sbom-validator
+      sbom-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
+    secrets:
+      interlynk-security-token: ${{ secrets.INTERLYNK_TOKEN }}
