@@ -25,7 +25,7 @@ SBOM specifications. It ensures compliance with formats like
 ## Supported Formats
 
 - CycloneDX JSON schemas: 1.2, 1.3, 1.4, 1.5, 1.6, 1.7
-- SPDX JSON schemas: 2.2, 2.3
+- SPDX JSON schemas: 2.2, 2.3, 3.0 (coming soon)
 - AI-SBOM JSON schema: 1.0.0
 
 The AI-SBOM schema is embedded from the immutable schema URL:
