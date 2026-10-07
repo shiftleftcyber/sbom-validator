@@ -11,7 +11,7 @@ permissions: read-all
 
 jobs:
   lint:
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/go-lint.yml@08214ced07c278eaed1c68fa459916e07f071553
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/go-lint.yml@24a5f2c9627962cf146079196bbf2a42138324a6
     with:
       go-version-file: go.mod
       golangci-lint-version: v2.8.0

@@ -11,7 +11,7 @@ permissions: read-all
 
 jobs:
   build:
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/go-ci.yml@08214ced07c278eaed1c68fa459916e07f071553
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/go-ci.yml@24a5f2c9627962cf146079196bbf2a42138324a6
     with:
       coverage-artifact-name: coverage-report
       go-version-file: go.mod

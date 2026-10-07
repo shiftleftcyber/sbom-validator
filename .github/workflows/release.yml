@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   source-sbom:
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/source-sbom-go.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/source-sbom-go.yml@24a5f2c9627962cf146079196bbf2a42138324a6
     with:
       artifact-name: signed-release-sbom
       fail-on-vulnerabilities: true
@@ -26,7 +26,7 @@ jobs:
 
   release:
     needs: source-sbom
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/release-go.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/release-go.yml@24a5f2c9627962cf146079196bbf2a42138324a6
     with:
       config: .goreleaser.yml
       evidence-artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
@@ -37,7 +37,7 @@ jobs:
 
   publish-interlynk:
     needs: source-sbom
-    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/publish-sbom-interlynk.yml@f945c3d57f3129a0124baa29fc77a9706e4e4131
+    uses: shiftleftcyber/supply-chain-workflows/.github/workflows/publish-sbom-interlynk.yml@24a5f2c9627962cf146079196bbf2a42138324a6
     with:
       artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
       environment: Production
