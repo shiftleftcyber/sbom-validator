@@ -39,7 +39,7 @@ jobs:
       - osv-scan
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/release-go.yml@v1
     with:
-      config: .goreleaser.yml
+      config: .goreleaser.yaml
       evidence-artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
       evidence-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
       go-version-file: go.mod
