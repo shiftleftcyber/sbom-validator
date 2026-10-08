@@ -16,6 +16,7 @@ jobs:
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/source-sbom-go.yml@v1
     with:
       artifact-name: signed-release-sbom
+      component-type: library
       fail-on-vulnerabilities: true
       file-prefix: sbom-validator-${{ github.ref_name }}
       go-version-file: go.mod
