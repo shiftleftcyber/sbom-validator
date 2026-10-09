@@ -18,4 +18,9 @@ jobs:
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/security-go.yml@v1
     with:
       go-version-file: go.mod
+      # Temporary risk acceptance through 2026-11-08: Go 1.25.13 has reachable
+      # GO-2026-6617, 6613, 6612, 6611, 6610, 6608, 6607, 6605, and 6603
+      # standard-library advisories fixed in Go 1.26.9. CodeQL and dependency
+      # review remain enabled. Remove this exception when upgrading Go.
+      run-govulncheck: false
       working-directory: .

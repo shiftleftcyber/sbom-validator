@@ -43,7 +43,6 @@ jobs:
       evidence-artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
       evidence-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
       go-version-file: go.mod
-      update-major-tag: true
       working-directory: .
 
   publish-interlynk:
