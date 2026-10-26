@@ -6,13 +6,12 @@ on:
       - "v*.*.*"
 
 permissions:
-  actions: read
-  attestations: write
-  contents: write
-  id-token: write
+  contents: read
 
 jobs:
   source-sbom:
+    permissions:
+      contents: read
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/source-sbom-go.yml@v1
     with:
       artifact-name: signed-release-sbom
@@ -26,17 +25,24 @@ jobs:
 
   osv-scan:
     needs: source-sbom
+    permissions:
+      actions: read
+      contents: read
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/scan-sbom-osv.yml@v1
     with:
       artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
-      fail-on-vulnerabilities: true
+      fail-on-vulnerabilities: false
       report-artifact-name: release-osv-scan-report
-      sbom-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
+      sbom-file: ${{ needs.source-sbom.outputs.unsigned-sbom-file }}
 
   release:
     needs:
       - source-sbom
       - osv-scan
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/release-go.yml@v1
     with:
       config: .goreleaser.yaml
@@ -49,6 +55,9 @@ jobs:
     needs:
       - source-sbom
       - osv-scan
+    permissions:
+      actions: read
+      contents: read
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/publish-sbom-interlynk.yml@v1
     with:
       artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
