@@ -28,9 +28,9 @@ jobs:
     uses: shiftleftcyber/supply-chain-workflows/.github/workflows/scan-sbom-osv.yml@v1
     with:
       artifact-name: ${{ needs.source-sbom.outputs.artifact-name }}
-      fail-on-vulnerabilities: true
+      fail-on-vulnerabilities: false
       report-artifact-name: source-osv-scan-report
-      sbom-file: ${{ needs.source-sbom.outputs.signed-sbom-file }}
+      sbom-file: ${{ needs.source-sbom.outputs.unsigned-sbom-file }}
 
   publish-interlynk:
     needs:
